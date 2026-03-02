@@ -1,0 +1,419 @@
+========================================================================
+STUDENT RECORD MANAGEMENT SYSTEM - DEVELOPMENT TASK PLAN
+========================================================================
+Course: IT323 - Midterm PIT
+Project: Student Record Management System
+Developer: [Your Name]
+Date Started: [Date]
+========================================================================
+
+TABLE OF CONTENTS:
+1. Project Overview
+2. Tech Stack Summary
+3. Database Setup Tasks
+4. Backend Development Tasks
+5. Frontend Development Tasks
+6. API Endpoints Checklist
+7. Feature Implementation Checklist
+8. Testing Checklist
+9. Submission Requirements
+
+========================================================================
+1. PROJECT OVERVIEW
+========================================================================
+A full-stack web application for managing student records with the following
+core functionalities:
+
+□ Add student record
+□ View all students
+□ Edit student record
+□ Delete student record
+□ Search student by name
+□ Filter by course
+
+========================================================================
+2. TECH STACK SUMMARY
+========================================================================
+Backend:
+- Runtime: Node.js
+- Framework: Express.js
+- Database: MySQL
+- Packages: express, mysql2, dotenv
+
+Frontend:
+- HTML5 (semantic elements)
+- CSS3 (Grid, Flexbox, variables, transitions)
+- JavaScript (Vanilla/Plain JS with Fetch API)
+
+========================================================================
+3. DATABASE SETUP TASKS
+========================================================================
+□ Task 3.1: Install and start MySQL (XAMPP/WAMP/MySQL Workbench)
+□ Task 3.2: Create database named 'student_management'
+□ Task 3.3: Create 'students' table with the following fields:
+    - id (INT, AUTO_INCREMENT, PRIMARY KEY)
+    - student_number (VARCHAR(20), UNIQUE, NOT NULL)
+    - first_name (VARCHAR(100), NOT NULL)
+    - last_name (VARCHAR(100), NOT NULL)
+    - course (VARCHAR(100), NOT NULL)
+    - year_level (INT, NOT NULL)
+    - created_at (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
+□ Task 3.4: Insert at least 5 sample student records for testing
+
+========================================================================
+4. BACKEND DEVELOPMENT TASKS
+========================================================================
+□ Task 4.1: Create project folder structure
+    student-management-system/
+    ├── server.js
+    ├── package.json
+    ├── .env
+    ├── .gitignore
+    ├── config/
+    │   └── db.js
+    ├── routes/
+    │   └── students.js
+    └── public/
+        ├── index.html
+        ├── css/
+        │   └── style.css
+        └── js/
+            └── app.js
+
+□ Task 4.2: Initialize npm and install dependencies
+    - Run: npm init -y
+    - Run: npm install express mysql2 dotenv
+
+□ Task 4.3: Configure environment variables (.env file)
+    - PORT
+    - DB_HOST
+    - DB_USER
+    - DB_PASSWORD
+    - DB_NAME
+
+□ Task 4.4: Create database connection (config/db.js)
+    - Set up MySQL connection pool using mysql2
+    - Export promise-based connection
+
+□ Task 4.5: Create main server file (server.js)
+    - Import and configure Express
+    - Set up middleware (express.json, express.static)
+    - Mount student routes
+    - Start server listening on configured port
+
+□ Task 4.6: Create API routes (routes/students.js)
+    - Implement all required endpoints (see Section 6)
+    - Use parameterized queries (prevent SQL injection)
+    - Implement proper error handling
+    - Return appropriate HTTP status codes
+    - Format responses as JSON
+
+========================================================================
+5. FRONTEND DEVELOPMENT TASKS
+========================================================================
+HTML STRUCTURE (public/index.html)
+□ Task 5.1: Create basic HTML5 structure
+□ Task 5.2: Add semantic header with navigation bar
+    - Logo/Title
+    - Navigation links (Home, Students, About)
+□ Task 5.3: Create main section
+□ Task 5.4: Build student registration form with fields:
+    - Student Number (text input, required)
+    - First Name (text input, required)
+    - Last Name (text input, required)
+    - Course (dropdown/select, required)
+    - Year Level (dropdown/select, required)
+    - Submit button
+    - Cancel button (hidden by default, appears when editing)
+□ Task 5.5: Create search and filter section
+    - Search input field
+    - Search button
+    - Course filter dropdown (All Courses, BSIT, BSCS, BSIS, etc.)
+□ Task 5.6: Build student table section
+    - Table with columns: ID, Student #, First Name, Last Name, Course, Year, Actions
+    - Table body for dynamic content
+□ Task 5.7: Add semantic footer
+    - Copyright information
+    - Project details
+
+CSS STYLES (public/css/style.css)
+□ Task 5.8: Define CSS variables for colors
+    - Primary color
+    - Secondary color
+    - Danger color
+    - Dark/light colors
+    - Border radius
+    - Transition timing
+□ Task 5.9: Implement CSS Grid for overall layout
+□ Task 5.10: Implement Flexbox for:
+    - Navigation bar
+    - Form layout
+    - Search/filter section
+    - Action buttons
+□ Task 5.11: Style form elements
+    - Input fields
+    - Select dropdowns
+    - Buttons
+    - Labels
+□ Task 5.12: Style table
+    - Header styling
+    - Row hover effects
+    - Alternating row colors
+    - Action buttons
+□ Task 5.13: Add hover effects
+    - Buttons transform/scale
+    - Row highlighting
+    - Link color changes
+□ Task 5.14: Implement smooth transitions
+□ Task 5.15: Make design responsive
+    - Mobile view (max-width: 768px)
+    - Tablet view
+    - Desktop view
+
+JAVASCRIPT FUNCTIONALITY (public/js/app.js)
+□ Task 5.16: Set up global variables and DOM element references
+□ Task 5.17: Add event listeners
+    - DOMContentLoaded
+    - Form submission
+    - Search button click
+    - Filter dropdown change
+    - Cancel button click
+□ Task 5.18: Implement fetch functions using async/await
+    - getAllStudents()
+    - getStudentById(id)
+    - searchStudents(keyword)
+□ Task 5.19: Implement CRUD operations
+    - addStudent(formData) - POST request
+    - updateStudent(id, formData) - PUT request
+    - deleteStudent(id) - DELETE request with confirmation
+□ Task 5.20: Create display function
+    - Dynamically render table rows
+    - Handle empty states
+    - Show loading indicator
+□ Task 5.21: Implement edit functionality
+    - Populate form with student data
+    - Change submit button text to "Update Student"
+    - Show cancel button
+□ Task 5.22: Implement form reset
+    - Clear all fields
+    - Reset button text to "Add Student"
+    - Hide cancel button
+□ Task 5.23: Add form validation
+    - Check all required fields
+    - Display validation messages
+□ Task 5.24: Implement filter functionality
+    - Get selected course value
+    - Filter displayed students
+□ Task 5.25: Add error handling
+    - Try/catch blocks
+    - User-friendly error messages
+    - Network error handling
+
+========================================================================
+6. API ENDPOINTS CHECKLIST
+========================================================================
+All endpoints must:
+- Use parameterized queries (NO string concatenation)
+- Return JSON responses
+- Use proper HTTP status codes (200, 201, 400, 404, 500)
+- Handle errors gracefully
+
+□ [ ] GET    /api/students              - Get all students (ordered by last_name ASC)
+□ [ ] GET    /api/students/:id          - Get single student by ID
+□ [ ] POST   /api/students              - Add new student (validate all fields)
+□ [ ] PUT    /api/students/:id          - Update existing student
+□ [ ] DELETE /api/students/:id          - Delete student
+□ [ ] GET    /api/students/search/:keyword - Search students by name (LIKE %keyword%)
+
+========================================================================
+7. FEATURE IMPLEMENTATION CHECKLIST
+========================================================================
+DATABASE (25 points)
+□ Database created successfully
+□ Table structure matches requirements
+□ Sample data inserted
+□ Primary key and unique constraints set
+□ Proper data types used
+
+BACKEND API (30 points)
+□ Server runs without errors
+□ Database connection successful
+□ All 6 API endpoints implemented
+□ Parameterized queries used (SQL injection prevention)
+□ Proper HTTP status codes implemented
+□ JSON responses formatted correctly
+□ Database errors handled properly
+
+CRUD OPERATIONS (25 points)
+□ CREATE: Add new student works
+□ READ: Display all students works
+□ UPDATE: Edit student works (form populates)
+□ DELETE: Delete student works with confirmation prompt
+□ SEARCH: Search by name using LIKE works
+□ FILTER: Filter by course works
+
+FRONTEND DESIGN (25 points)
+□ Responsive navigation bar
+□ Complete student registration form
+□ Dynamic student table with edit/delete buttons
+□ Search bar with button
+□ Filter dropdown populated with courses
+□ Semantic HTML elements used (header, main, section, footer)
+□ CSS Grid implemented for layout
+□ Flexbox implemented for alignment
+□ Hover effects working on buttons and rows
+□ Smooth transitions on interactions
+□ CSS variables used for colors
+□ Mobile responsive design
+
+JAVASCRIPT LOGIC (20 points)
+□ Async/await used for all fetch calls
+□ Form validation before submission
+□ Dynamic table rendering with JS
+□ Edit button populates form correctly
+□ Delete with confirmation prompt
+□ Search functionality works
+□ Form reset after submission/cancel
+□ Event delegation for dynamic elements (if applicable)
+
+ERROR HANDLING (10 points)
+□ Database connection errors handled
+□ Network errors handled
+□ Form validation errors displayed
+□ User-friendly error messages
+□ Empty states handled (no students found)
+
+========================================================================
+8. TESTING CHECKLIST
+========================================================================
+□ TEST 1: Add new student
+    - Fill all fields correctly
+    - Submit form
+    - Verify student appears in table
+    - Verify form resets
+
+□ TEST 2: Add student validation
+    - Try submitting with empty fields
+    - Should show validation error
+    - Should not add to database
+
+□ TEST 3: Edit student
+    - Click Edit button on any student
+    - Form should populate with correct data
+    - Submit button text should change to "Update"
+    - Cancel button should appear
+    - Make changes and submit
+    - Verify table updates with changes
+
+□ TEST 4: Cancel edit
+    - Click Edit on any student
+    - Click Cancel button
+    - Form should clear
+    - Submit button should return to "Add Student"
+    - Cancel button should hide
+
+□ TEST 5: Delete student
+    - Click Delete button on any student
+    - Confirmation prompt should appear
+    - Click OK
+    - Student should disappear from table
+    - Test Cancel on prompt (should not delete)
+
+□ TEST 6: Search functionality
+    - Type existing student name in search
+    - Click Search button
+    - Table should show matching students only
+    - Test with partial name (should still match)
+    - Test with non-existent name (show empty state)
+    - Clear search and refresh should show all
+
+□ TEST 7: Filter by course
+    - Select specific course from dropdown
+    - Table should show students from that course only
+    - Select "All Courses"
+    - Should show all students again
+
+□ TEST 8: Responsive design
+    - Open in desktop view (1920px)
+    - Resize to tablet view (768px)
+    - Resize to mobile view (375px)
+    - Verify layout adjusts appropriately
+    - Check all elements are readable/usable
+
+□ TEST 9: Error scenarios
+    - Turn off MySQL server, try to load page
+    - Should show appropriate error message
+    - Test with invalid API endpoints
+
+□ TEST 10: Data integrity
+    - Add student with duplicate student number
+    - Should show error (unique constraint)
+    - Verify no duplicate added
+
+========================================================================
+9. SUBMISSION REQUIREMENTS
+========================================================================
+2-3 Page Technical Report must include:
+
+PAGE 1: SYSTEM ARCHITECTURE
+□ System overview and purpose
+□ Tech stack explanation (why each technology was chosen)
+□ Folder structure diagram
+□ Component interaction diagram
+
+PAGE 2: DATABASE DESIGN & API FLOW
+□ Database schema explanation
+□ Table structure with field descriptions
+□ API endpoint documentation (methods, URLs, request/response examples)
+□ API flow diagram
+□ Explanation of parameterized queries and security
+
+PAGE 3: IMPLEMENTATION DETAILS
+□ Challenges encountered during development
+□ How challenges were solved
+□ Future improvements/enhancements
+□ At least 2-3 screenshots of working system
+□ Conclusion
+
+========================================================================
+10. GRADING RUBRIC REFERENCE (150 POINTS)
+========================================================================
+Criteria                          Points
+Database Design & SQL             25
+Backend API Implementation        30
+CRUD Functionality                25
+Front-End Design & Responsiveness 25
+JavaScript Logic                  20
+Error Handling & Validation       10
+Documentation                     10
+Code Structure & Cleanliness      5
+--------------------------------------
+TOTAL                             150
+
+========================================================================
+PROJECT COMPLETION STATUS
+========================================================================
+Database Design & SQL (25 points):         [ ] PENDING [ ] COMPLETED
+Backend API Implementation (30 points):    [ ] PENDING [ ] COMPLETED
+CRUD Functionality (25 points):            [ ] PENDING [ ] COMPLETED
+Front-End Design (25 points):              [ ] PENDING [ ] COMPLETED
+JavaScript Logic (20 points):              [ ] PENDING [ ] COMPLETED
+Error Handling (10 points):                 [ ] PENDING [ ] COMPLETED
+Documentation (10 points):                  [ ] PENDING [ ] COMPLETED
+Code Structure (5 points):                  [ ] PENDING [ ] COMPLETED
+
+========================================================================
+NOTES & REMINDERS
+========================================================================
+□ Remember to use parameterized queries (prevent SQL injection)
+□ Use HTTP status codes appropriately
+□ Make sure all required fields are validated
+□ Test all features thoroughly before submission
+□ Take screenshots for documentation
+□ Comment your code properly
+□ Use consistent naming conventions
+□ Keep code organized and clean
+
+========================================================================
+END OF DEVELOPMENT TASK PLAN
+========================================================================
