@@ -1,6 +1,6 @@
 // Wait for page to load
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 AcademicSuite initialized!');
+    console.log('📚 Student Management System initialized');
     initializeApp();
 });
 
@@ -8,30 +8,27 @@ document.addEventListener('DOMContentLoaded', () => {
 let allStudents = [];
 let currentFilters = {
     search: '',
-    course: '',
-    year: '',
     filterType: 'all'
 };
 let isEditMode = false;
 let currentEditId = null;
 
+// Course class mapping
+const courseClassMap = {
+    'Computer Science': 'cs',
+    'Information Technology': 'it',
+    'Data Science': 'ds',
+    'Software Engineering': 'se'
+};
+
 // Initialize application
 function initializeApp() {
-    // Theme setup
     initializeTheme();
-    
-    // Fetch initial data
     fetchAllStudents();
-    
-    // Setup event listeners
     setupEventListeners();
-    
-    // Update time
     updateCurrentTime();
     setInterval(updateCurrentTime, 1000);
-    
-    // Populate stats
-    updateStats();
+    setupFormValidation(); // New: real-time validation
 }
 
 // ===== THEME MANAGEMENT =====
@@ -40,32 +37,27 @@ function initializeTheme() {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const savedTheme = localStorage.getItem('theme');
     
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.body.classList.remove('light-mode');
-        document.body.classList.add('dark-mode');
+    if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+        document.body.classList.remove('dark-mode');
+        document.body.classList.add('light-mode');
     }
     
     themeToggle.addEventListener('click', toggleTheme);
 }
 
 function toggleTheme() {
-    if (document.body.classList.contains('light-mode')) {
-        document.body.classList.remove('light-mode');
-        document.body.classList.add('dark-mode');
-        localStorage.setItem('theme', 'dark');
-    } else {
+    if (document.body.classList.contains('dark-mode')) {
         document.body.classList.remove('dark-mode');
         document.body.classList.add('light-mode');
         localStorage.setItem('theme', 'light');
+    } else {
+        document.body.classList.remove('light-mode');
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
     }
     
     showToast(`Switched to ${document.body.classList.contains('dark-mode') ? 'dark' : 'light'} mode`, 'info');
 }
-
-// ===== SIDE NAVIGATION =====
-document.getElementById('menuToggle').addEventListener('click', () => {
-    document.getElementById('sideNav').classList.toggle('collapsed');
-});
 
 // ===== FETCH ALL STUDENTS =====
 async function fetchAllStudents() {
@@ -78,14 +70,14 @@ async function fetchAllStudents() {
         }
         
         allStudents = await response.json();
-        console.log('📊 Students loaded:', allStudents.length);
+        console.log(`📊 Loaded ${allStudents.length} student records`);
         
         updateStats();
         applyFilters();
         
     } catch (error) {
-        console.error('❌ Error fetching students:', error);
-        showToast('Failed to load students', 'error');
+        console.error('❌ Error:', error);
+        showToast('Failed to load student records', 'error');
         showEmptyState(true);
     } finally {
         showLoading(false);
@@ -108,26 +100,41 @@ function displayStudents(students) {
     
     let html = '';
     students.forEach((student, index) => {
+        const courseClass = getCourseClass(student.course);
+        
         html += `
-            <tr style="animation: fadeIn 0.3s ease ${index * 0.05}s both;">
-                <td><span class="status-badge">#${student.id}</span></td>
-                <td><strong>${escapeHtml(student.student_number)}</strong></td>
+            <tr data-course="${escapeHtml(student.course)}" style="animation: fadeIn 0.3s ease ${index * 0.05}s both;">
+                <td>
+                    <span class="status-badge ${courseClass}">
+                        #${student.id}
+                    </span>
+                </td>
+                <td><strong style="color: var(--text-primary);">${escapeHtml(student.student_number)}</strong></td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <img src="https://ui-avatars.com/api/?name=${escapeHtml(student.first_name)}+${escapeHtml(student.last_name)}&background=831d1c&color=fff&bold=true&size=32" 
-                             style="width: 32px; height: 32px; border-radius: 8px;">
-                        ${escapeHtml(student.first_name)} ${escapeHtml(student.last_name)}
+                        <div style="width: 32px; height: 32px; background: var(--course-${courseClass}); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            ${escapeHtml(student.first_name.charAt(0))}${escapeHtml(student.last_name.charAt(0))}
+                        </div>
+                        <span style="color: var(--text-primary);">${escapeHtml(student.first_name)} ${escapeHtml(student.last_name)}</span>
                     </div>
                 </td>
-                <td>${escapeHtml(student.course)}</td>
-                <td>${student.year_level}${getYearSuffix(student.year_level)} Year</td>
-                <td><span class="status-badge">Active</span></td>
+                <td>
+                    <span class="course-name ${courseClass}">
+                        ${escapeHtml(student.course)}
+                    </span>
+                </td>
+                <td style="color: var(--text-secondary);">${student.year_level}${getYearSuffix(student.year_level)} Year</td>
+                <td>
+                    <span class="status-badge ${courseClass}">
+                        Active
+                    </span>
+                </td>
                 <td>
                     <div class="action-buttons">
-                        <button class="action-btn-sm edit" onclick="editStudent(${student.id})" title="Edit Student">
+                        <button class="action-btn-sm" onclick="editStudent(${student.id})" title="Edit Record">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="action-btn-sm delete" onclick="deleteStudent(${student.id})" title="Delete Student">
+                        <button class="action-btn-sm" onclick="deleteStudent(${student.id})" title="Delete Record">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -141,8 +148,100 @@ function displayStudents(students) {
         `Showing ${students.length} of ${allStudents.length} records`;
 }
 
+// Helper to get course class
+function getCourseClass(course) {
+    return courseClassMap[course] || '';
+}
+
+// ===== EVENT LISTENERS =====
+function setupEventListeners() {
+    // Form submission
+    document.getElementById('studentForm').addEventListener('submit', handleFormSubmit);
+    
+    // Clear form button
+    document.getElementById('clearFormBtn').addEventListener('click', resetForm);
+    
+    // Toggle form panel
+    document.getElementById('toggleFormBtn').addEventListener('click', () => {
+        const panelBody = document.querySelector('.panel .panel-body');
+        const icon = document.querySelector('#toggleFormBtn i');
+        
+        if (panelBody.style.display === 'none') {
+            panelBody.style.display = 'block';
+            icon.className = 'fas fa-chevron-down';
+        } else {
+            panelBody.style.display = 'none';
+            icon.className = 'fas fa-chevron-up';
+        }
+    });
+    
+    // Search input with debounce
+    document.getElementById('searchInput').addEventListener('input', debounce(() => {
+        currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
+        applyFilters();
+    }, 300));
+    
+    // Filter chips
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            
+            currentFilters.filterType = this.dataset.filter;
+            applyFilters();
+        });
+    });
+    
+    // Refresh button
+    document.getElementById('refreshBtn').addEventListener('click', fetchAllStudents);
+    
+    // Menu toggle
+    document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sideNav').classList.toggle('collapsed');
+    });
+}
+
+// ===== FORM VALIDATION (real-time) =====
+function setupFormValidation() {
+    const inputs = ['student_number', 'first_name', 'last_name', 'course', 'year_level'];
+    inputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', validateFormRealTime);
+            el.addEventListener('change', validateFormRealTime);
+        }
+    });
+    validateFormRealTime(); // initial check
+}
+
+function validateFormRealTime() {
+    const data = {
+        student_number: document.getElementById('student_number').value,
+        first_name: document.getElementById('first_name').value,
+        last_name: document.getElementById('last_name').value,
+        course: document.getElementById('course').value,
+        year_level: document.getElementById('year_level').value
+    };
+    
+    const isValid = 
+        data.student_number && data.student_number.length >= 5 &&
+        data.first_name && data.first_name.length >= 2 &&
+        data.last_name && data.last_name.length >= 2 &&
+        data.course &&
+        data.year_level && data.year_level >= 1 && data.year_level <= 4;
+    
+    const submitBtn = document.querySelector('#studentForm button[type="submit"]');
+    if (isValid) {
+        submitBtn.disabled = false;
+        submitBtn.classList.add('btn-valid');
+    } else {
+        submitBtn.disabled = true;
+        submitBtn.classList.remove('btn-valid');
+    }
+}
+
 // ===== FORM HANDLING =====
-document.getElementById('studentForm').addEventListener('submit', async (e) => {
+async function handleFormSubmit(e) {
     e.preventDefault();
     
     const formData = {
@@ -150,7 +249,7 @@ document.getElementById('studentForm').addEventListener('submit', async (e) => {
         first_name: document.getElementById('first_name').value,
         last_name: document.getElementById('last_name').value,
         course: document.getElementById('course').value,
-        year_level: document.getElementById('year_level').value
+        year_level: parseInt(document.getElementById('year_level').value)
     };
     
     if (!validateForm(formData)) return;
@@ -172,7 +271,10 @@ document.getElementById('studentForm').addEventListener('submit', async (e) => {
             throw new Error(error.message || 'Operation failed');
         }
         
-        showToast(isEditMode ? 'Student updated successfully!' : 'Student added successfully!', 'success');
+        showToast(
+            isEditMode ? 'Student record updated successfully' : 'New student record added successfully',
+            'success'
+        );
         
         resetForm();
         await fetchAllStudents();
@@ -182,21 +284,7 @@ document.getElementById('studentForm').addEventListener('submit', async (e) => {
     } finally {
         showLoading(false);
     }
-});
-
-document.getElementById('clearFormBtn').addEventListener('click', resetForm);
-document.getElementById('toggleFormBtn').addEventListener('click', () => {
-    const panel = document.querySelector('.form-panel .panel-body');
-    const icon = document.querySelector('#toggleFormBtn i');
-    
-    if (panel.style.display === 'none') {
-        panel.style.display = 'block';
-        icon.className = 'fas fa-chevron-down';
-    } else {
-        panel.style.display = 'none';
-        icon.className = 'fas fa-chevron-up';
-    }
-});
+}
 
 // ===== EDIT STUDENT =====
 async function editStudent(id) {
@@ -227,13 +315,20 @@ async function editStudent(id) {
         submitBtn.innerHTML = '<i class="fas fa-pen"></i> Update Record';
         
         // Expand form if collapsed
-        document.querySelector('.form-panel .panel-body').style.display = 'block';
+        const panelBody = document.querySelector('.panel .panel-body');
+        panelBody.style.display = 'block';
         document.querySelector('#toggleFormBtn i').className = 'fas fa-chevron-down';
         
         // Highlight form
-        document.querySelector('.form-panel').style.boxShadow = '0 0 0 2px var(--accent-gold)';
+        document.querySelector('.panel').style.borderColor = 'var(--accent-orange)';
+        
+        // Scroll to form
+        document.querySelector('.panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
         
         showToast('Edit mode activated', 'info');
+        
+        // Re-validate after populating
+        validateFormRealTime();
         
     } catch (error) {
         showToast('Failed to load student details', 'error');
@@ -245,8 +340,8 @@ async function editStudent(id) {
 // ===== DELETE STUDENT =====
 async function deleteStudent(id) {
     const confirmed = await showConfirmationModal(
-        'Delete Student Record',
-        'Are you sure you want to delete this student? This action cannot be undone.'
+        'Delete Record',
+        'Are you sure you want to delete this student record? This action cannot be undone.'
     );
     
     if (!confirmed) return;
@@ -259,37 +354,20 @@ async function deleteStudent(id) {
         });
         
         if (!response.ok) {
-            throw new Error('Failed to delete student');
+            throw new Error('Failed to delete student record');
         }
         
-        showToast('Student deleted successfully!', 'success');
+        showToast('Student record deleted successfully', 'success');
         await fetchAllStudents();
         
     } catch (error) {
-        showToast('Failed to delete student', 'error');
+        showToast('Failed to delete student record', 'error');
     } finally {
         showLoading(false);
     }
 }
 
-// ===== SEARCH & FILTERS =====
-document.getElementById('searchInput').addEventListener('input', debounce(() => {
-    currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
-    applyFilters();
-}, 300));
-
-document.querySelectorAll('.filter-chip').forEach(chip => {
-    chip.addEventListener('click', function() {
-        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-        
-        currentFilters.filterType = this.dataset.filter;
-        applyFilters();
-    });
-});
-
-document.getElementById('resetBtn').addEventListener('click', resetFilters);
-
+// ===== FILTERS =====
 function applyFilters() {
     let filtered = [...allStudents];
     
@@ -310,32 +388,17 @@ function applyFilters() {
             'ds': 'Data Science',
             'se': 'Software Engineering'
         };
-        filtered = filtered.filter(student => 
-            student.course === courseMap[currentFilters.filterType]
-        );
+        const selectedCourse = courseMap[currentFilters.filterType];
+        filtered = filtered.filter(student => student.course === selectedCourse);
     }
     
     displayStudents(filtered);
 }
 
-function resetFilters() {
-    document.getElementById('searchInput').value = '';
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    document.querySelector('[data-filter="all"]').classList.add('active');
-    
-    currentFilters = {
-        search: '',
-        filterType: 'all'
-    };
-    
-    applyFilters();
-    showToast('Filters cleared', 'info');
-}
-
 // ===== UTILITY FUNCTIONS =====
 function validateForm(data) {
     if (!data.student_number || data.student_number.length < 5) {
-        showToast('Please enter a valid student number', 'error');
+        showToast('Please enter a valid student ID', 'error');
         return false;
     }
     
@@ -354,8 +417,8 @@ function validateForm(data) {
         return false;
     }
     
-    if (!data.year_level) {
-        showToast('Please select a year level', 'error');
+    if (!data.year_level || data.year_level < 1 || data.year_level > 4) {
+        showToast('Please select a valid year level', 'error');
         return false;
     }
     
@@ -368,9 +431,11 @@ function resetForm() {
     currentEditId = null;
     
     const submitBtn = document.querySelector('#studentForm button[type="submit"]');
-    submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Record';
+    submitBtn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Record';
     
-    document.querySelector('.form-panel').style.boxShadow = 'none';
+    document.querySelector('.panel').style.borderColor = 'var(--border-color)';
+    
+    validateFormRealTime(); // re-check validity
 }
 
 function updateStats() {
@@ -396,7 +461,9 @@ function getYearSuffix(year) {
 }
 
 function escapeHtml(unsafe) {
+    if (!unsafe) return '';
     return unsafe
+        .toString()
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
@@ -452,26 +519,53 @@ function showToast(message, type = 'info') {
     
     container.appendChild(toast);
     
+    // Auto-remove after 3 seconds
     setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => container.removeChild(toast), 300);
+        setTimeout(() => {
+            if (container.contains(toast)) {
+                container.removeChild(toast);
+            }
+        }, 300);
     }, 3000);
 }
 
 function showConfirmationModal(title, message) {
     return new Promise((resolve) => {
         const modal = document.getElementById('confirmModal');
-        document.getElementById('modalMessage').textContent = message;
+        const modalMessage = document.getElementById('modalMessage');
+        const modalTitle = modal.querySelector('h3');
+        
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
         modal.style.display = 'flex';
         
-        document.getElementById('modalConfirm').onclick = () => {
+        const handleConfirm = () => {
             modal.style.display = 'none';
+            document.getElementById('modalConfirm').removeEventListener('click', handleConfirm);
+            document.getElementById('modalCancel').removeEventListener('click', handleCancel);
             resolve(true);
         };
         
-        document.getElementById('modalCancel').onclick = () => {
+        const handleCancel = () => {
             modal.style.display = 'none';
+            document.getElementById('modalConfirm').removeEventListener('click', handleConfirm);
+            document.getElementById('modalCancel').removeEventListener('click', handleCancel);
             resolve(false);
         };
+        
+        document.getElementById('modalConfirm').addEventListener('click', handleConfirm);
+        document.getElementById('modalCancel').addEventListener('click', handleCancel);
+        
+        // Close modal if clicked outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                handleCancel();
+            }
+        });
     });
 }
+
+// Export functions for global access (for onclick handlers)
+window.editStudent = editStudent;
+window.deleteStudent = deleteStudent;
