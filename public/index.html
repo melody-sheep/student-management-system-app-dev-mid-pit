@@ -3,71 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management System</title>
+    <title>StudentFlow • Management System</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Inter for modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- 1. Navigation Bar -->
-    <nav>
-        <h1>Student Management System</h1>
+    <!-- 1. Modern Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Student<span class="highlight">Flow</span></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#students"><i class="fas fa-users"></i> Students</a></li>
+                <li><a href="#reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                <li><a href="#settings"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+            <div class="nav-user">
+                <i class="fas fa-user-circle"></i>
+                <span>Admin</span>
+            </div>
+        </div>
     </nav>
 
-    <!-- 2. Main Container -->
-    <main>
-        <!-- 3. Student Form Section -->
-        <section class="form-section">
-            <h2>Add New Student</h2>
-            <form id="studentForm">
-                <input type="text" id="student_number" placeholder="Student Number" required>
-                <input type="text" id="first_name" placeholder="First Name" required>
-                <input type="text" id="last_name" placeholder="Last Name" required>
-                <select id="course" required>
-                    <option value="">Select Course</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Information Technology">Information Technology</option>
-                    <option value="Data Science">Data Science</option>
-                </select>
-                <input type="number" id="year_level" placeholder="Year Level" min="1" max="4" required>
-                <button type="submit">Add Student</button>
+    <!-- 2. Main Container with Grid Layout -->
+    <main class="main-container">
+        <!-- 3. Header with Welcome Message -->
+        <div class="page-header">
+            <div class="header-title">
+                <h1>Student Records</h1>
+                <p>Manage and track all students in one place</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <i class="fas fa-user-graduate"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="totalStudents">0</span>
+                        <span class="stat-label">Total Students</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Student Form Card -->
+        <div class="form-card">
+            <div class="form-header">
+                <h2><i class="fas fa-plus-circle"></i> Add New Student</h2>
+                <p>Fill in the student details below</p>
+            </div>
+            <form id="studentForm" class="modern-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="student_number">
+                            <i class="fas fa-id-card"></i> Student Number
+                        </label>
+                        <input type="text" id="student_number" placeholder="e.g., 2024-0001" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="first_name">
+                            <i class="fas fa-user"></i> First Name
+                        </label>
+                        <input type="text" id="first_name" placeholder="Enter first name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last_name">
+                            <i class="fas fa-user"></i> Last Name
+                        </label>
+                        <input type="text" id="last_name" placeholder="Enter last name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="course">
+                            <i class="fas fa-book"></i> Course
+                        </label>
+                        <select id="course" required>
+                            <option value="" disabled selected>Select a course</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Data Science">Data Science</option>
+                            <option value="Software Engineering">Software Engineering</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="year_level">
+                            <i class="fas fa-layer-group"></i> Year Level
+                        </label>
+                        <select id="year_level" required>
+                            <option value="" disabled selected>Select year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> Clear
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Student
+                    </button>
+                </div>
             </form>
-        </section>
+        </div>
 
-        <!-- 4. Search and Filter Section -->
-        <section class="search-section">
-            <input type="text" id="searchInput" placeholder="Search by name...">
-            <button id="searchBtn">Search</button>
-            <select id="filterCourse">
-                <option value="">All Courses</option>
-                <!-- Will be populated by JS -->
-            </select>
-        </section>
+        <!-- 5. Search and Filter Bar -->
+        <div class="search-filter-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by name, course, or student number...">
+            </div>
+            
+            <div class="filter-group">
+                <select id="filterCourse" class="filter-select">
+                    <option value="">All Courses</option>
+                </select>
+                
+                <select id="filterYear" class="filter-select">
+                    <option value="">All Years</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+                
+                <button id="searchBtn" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+                
+                <button id="resetBtn" class="btn btn-secondary">
+                    <i class="fas fa-sync-alt"></i> Reset
+                </button>
+            </div>
+        </div>
 
-        <!-- 5. Students Table Section -->
-        <section class="table-section">
-            <h2>Student Records</h2>
-            <table id="studentTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Student #</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Course</th>
-                        <th>Year</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="studentTableBody">
-                    <!-- Dynamic content will load here -->
-                </tbody>
-            </table>
-        </section>
+        <!-- 6. Students Table Section -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2><i class="fas fa-list"></i> Student Records</h2>
+                <div class="table-actions">
+                    <span class="table-info" id="recordCount">Showing 0 records</span>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Student #</th>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Year</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <!-- Dynamic content will load here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+            </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fas fa-users-slash"></i>
+                <h3>No Students Found</h3>
+                <p>Get started by adding a new student</p>
+            </div>
+        </div>
     </main>
 
-    <!-- 6. Footer -->
-    <footer>
-        <p>&copy; 2024 Student Management System</p>
+    <!-- 7. Modern Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <i class="fas fa-graduation-cap"></i>
+                <span>StudentFlow Management System</span>
+            </div>
+            <div class="footer-section">
+                <span>&copy; 2024 All rights reserved</span>
+            </div>
+            <div class="footer-section">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
     </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <script src="js/app.js"></script>
 </body>
