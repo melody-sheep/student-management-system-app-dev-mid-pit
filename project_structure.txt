@@ -5,6 +5,8 @@
 ├── 📄 .env                                         # 🔐 Environment variables (DB credentials, port) - NEVER share this!
 ├── 📄 .gitignore                                    # 🙈 Files/folders to ignore when pushing to GitHub (node_modules, .env)
 ├── 📄 README.md                                     # 📖 Project documentation, setup instructions, features
+├── 📄 test-db.js                                    # 🧪 Database connection test script
+├── 📄 dev_task_plan.txt                             # 📝 Development task plan and notes
 │
 ├── 📁 config/                                       # ⚙️ Configuration files folder
 │   └── 📄 db.js                                     # 🗄️ Database connection setup using mysql2 (connection pool)
@@ -12,10 +14,18 @@
 ├── 📁 routes/                                       # 🛣️ API route handlers folder
 │   └── 📄 students.js                                # 👨‍🎓 All student-related API endpoints (GET, POST, PUT, DELETE, SEARCH)
 │
-└── 📁 public/                                        # 🌍 Frontend files (served statically)
-    ├── 📄 index.html                                  # 🏠 Main HTML page - contains form, table, search bar, navbar, footer
-    ├── 📁 css/                                        # 🎨 Stylesheets folder
-    │   └── 📄 style.css                                # 💅 All CSS styles - Grid, Flexbox, variables, hover effects, responsive design
-    ├── 📁 js/                                         # 📜 JavaScript files folder
-    │   └── 📄 app.js                                    # ⚡ Frontend logic - fetch API, form handling, dynamic table, CRUD operations
-    └── 📁 assets/                                      # 🖼️ (Optional) Images, icons, fonts
+├── 📁 public/                                        # 🌍 Frontend files (served statically)
+│   ├── 📄 index.html                                  # 🏠 Main HTML page - contains form, table, search bar, navbar, footer
+│   ├── 📁 css/                                        # 🎨 Stylesheets folder
+│   │   └── 📄 style.css                                # 💅 All CSS styles - Grid, Flexbox, variables, hover effects, responsive design
+│   ├── 📁 js/                                         # 📜 JavaScript files folder
+│   │   └── 📄 app.js                                    # ⚡ Frontend logic - fetch API, form handling, dynamic table, CRUD operations
+│   └── 📁 assets/                                      # 🖼️ (Optional) Images, icons, fonts
+│
+└── 📁 postman/                                       # 🧪 Postman API documentation and test collections
+    ├── 📁 collections/                                 # 📂 API request collections
+    ├── 📁 environments/                                # 🌐 Environment configurations
+    ├── 📁 flows/                                       # 🔄 API workflow definitions
+    ├── 📁 globals/                                     # 🌎 Global variables
+    │   └── 📄 workspace.globals.yaml                   # 🌍 Workspace global variables
+    └── 📁 specs/                                       # 📋 API specifications
