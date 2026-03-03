@@ -1,21 +1,24 @@
 // Wait for page to load
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 StudentFlow initialized!');
+    console.log('🚀 AcademicSuite initialized!');
     initializeApp();
 });
 
 // Global state
 let allStudents = [];
-let currentFilter = {
+let currentFilters = {
     search: '',
     course: '',
-    year: ''
+    year: '',
+    filterType: 'all'
 };
+let isEditMode = false;
+let currentEditId = null;
 
 // Initialize application
 function initializeApp() {
-    // Show loading state
-    showLoading(true);
+    // Theme setup
+    initializeTheme();
     
     // Fetch initial data
     fetchAllStudents();
@@ -23,37 +26,48 @@ function initializeApp() {
     // Setup event listeners
     setupEventListeners();
     
-    // Populate course filter
-    populateCourseFilter();
+    // Update time
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+    
+    // Populate stats
+    updateStats();
 }
 
-// Setup all event listeners
-function setupEventListeners() {
-    // Form submission
-    document.getElementById('studentForm').addEventListener('submit', handleFormSubmit);
+// ===== THEME MANAGEMENT =====
+function initializeTheme() {
+    const themeToggle = document.getElementById('themeToggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('theme');
     
-    // Search button
-    document.getElementById('searchBtn').addEventListener('click', applyFilters);
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.body.classList.remove('light-mode');
+        document.body.classList.add('dark-mode');
+    }
     
-    // Reset button
-    document.getElementById('resetBtn').addEventListener('click', resetFilters);
-    
-    // Real-time search (optional)
-    document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 500));
-    
-    // Filter changes
-    document.getElementById('filterCourse').addEventListener('change', applyFilters);
-    document.getElementById('filterYear').addEventListener('change', applyFilters);
-    
-    // Form reset
-    document.getElementById('studentForm').addEventListener('reset', () => {
-        // Reset form state
-        document.getElementById('studentForm').dataset.mode = 'add';
-        document.getElementById('studentForm').dataset.editId = '';
-    });
+    themeToggle.addEventListener('click', toggleTheme);
 }
 
-// FETCH: Get all students
+function toggleTheme() {
+    if (document.body.classList.contains('light-mode')) {
+        document.body.classList.remove('light-mode');
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.body.classList.remove('dark-mode');
+        document.body.classList.add('light-mode');
+        localStorage.setItem('theme', 'light');
+    }
+    
+    showToast(`Switched to ${document.body.classList.contains('dark-mode') ? 'dark' : 'light'} mode`, 'info');
+}
+
+// ===== SIDE NAVIGATION =====
+document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sideNav').classList.toggle('collapsed');
+});
+
+// ===== FETCH ALL STUDENTS =====
 async function fetchAllStudents() {
     try {
         showLoading(true);
@@ -66,10 +80,7 @@ async function fetchAllStudents() {
         allStudents = await response.json();
         console.log('📊 Students loaded:', allStudents.length);
         
-        // Update total students count
-        updateStudentCount();
-        
-        // Apply any existing filters
+        updateStats();
         applyFilters();
         
     } catch (error) {
@@ -81,7 +92,7 @@ async function fetchAllStudents() {
     }
 }
 
-// DISPLAY: Show students in table with animations
+// ===== DISPLAY STUDENTS =====
 function displayStudents(students) {
     const tbody = document.getElementById('studentTableBody');
     const emptyState = document.getElementById('emptyState');
@@ -89,52 +100,51 @@ function displayStudents(students) {
     if (!students || students.length === 0) {
         tbody.innerHTML = '';
         emptyState.style.display = 'block';
-        document.getElementById('recordCount').textContent = 'Showing 0 records';
+        document.getElementById('recordCount').textContent = 'Showing 0 of 0 records';
         return;
     }
     
     emptyState.style.display = 'none';
     
-    // Build table HTML with staggered animation
     let html = '';
     students.forEach((student, index) => {
         html += `
-            <tr style="animation: fadeIn 0.3s ease-out ${index * 0.05}s both;">
-                <td><span class="status-badge status-active">#${student.id}</span></td>
+            <tr style="animation: fadeIn 0.3s ease ${index * 0.05}s both;">
+                <td><span class="status-badge">#${student.id}</span></td>
                 <td><strong>${escapeHtml(student.student_number)}</strong></td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-user-circle" style="color: var(--primary); font-size: 1.5rem;"></i>
+                        <img src="https://ui-avatars.com/api/?name=${escapeHtml(student.first_name)}+${escapeHtml(student.last_name)}&background=831d1c&color=fff&bold=true&size=32" 
+                             style="width: 32px; height: 32px; border-radius: 8px;">
                         ${escapeHtml(student.first_name)} ${escapeHtml(student.last_name)}
                     </div>
                 </td>
                 <td>${escapeHtml(student.course)}</td>
                 <td>${student.year_level}${getYearSuffix(student.year_level)} Year</td>
-                <td><span class="status-badge status-active">Active</span></td>
+                <td><span class="status-badge">Active</span></td>
                 <td>
-                    <button class="action-btn edit" onclick="editStudent(${student.id})" title="Edit Student">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn delete" onclick="deleteStudent(${student.id})" title="Delete Student">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="action-buttons">
+                        <button class="action-btn-sm edit" onclick="editStudent(${student.id})" title="Edit Student">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn-sm delete" onclick="deleteStudent(${student.id})" title="Delete Student">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
     });
     
     tbody.innerHTML = html;
-    
-    // Update record count
     document.getElementById('recordCount').textContent = 
         `Showing ${students.length} of ${allStudents.length} records`;
 }
 
-// HANDLE FORM SUBMIT: Add or Update student
-async function handleFormSubmit(e) {
+// ===== FORM HANDLING =====
+document.getElementById('studentForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Get form data
     const formData = {
         student_number: document.getElementById('student_number').value,
         first_name: document.getElementById('first_name').value,
@@ -143,31 +153,17 @@ async function handleFormSubmit(e) {
         year_level: document.getElementById('year_level').value
     };
     
-    // Validate form
-    if (!validateForm(formData)) {
-        return;
-    }
-    
-    const form = e.target;
-    const mode = form.dataset.mode || 'add';
-    const editId = form.dataset.editId;
+    if (!validateForm(formData)) return;
     
     try {
         showLoading(true);
         
-        let url = '/api/students';
-        let method = 'POST';
-        
-        if (mode === 'edit' && editId) {
-            url = `/api/students/${editId}`;
-            method = 'PUT';
-        }
+        const url = isEditMode ? `/api/students/${currentEditId}` : '/api/students';
+        const method = isEditMode ? 'PUT' : 'POST';
         
         const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            method,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         });
         
@@ -176,26 +172,33 @@ async function handleFormSubmit(e) {
             throw new Error(error.message || 'Operation failed');
         }
         
-        const result = await response.json();
+        showToast(isEditMode ? 'Student updated successfully!' : 'Student added successfully!', 'success');
         
-        // Show success message
-        showToast(mode === 'add' ? 'Student added successfully!' : 'Student updated successfully!', 'success');
-        
-        // Reset form
         resetForm();
-        
-        // Refresh student list
         await fetchAllStudents();
         
     } catch (error) {
-        console.error('❌ Error:', error);
         showToast(error.message, 'error');
     } finally {
         showLoading(false);
     }
-}
+});
 
-// EDIT: Populate form with student data
+document.getElementById('clearFormBtn').addEventListener('click', resetForm);
+document.getElementById('toggleFormBtn').addEventListener('click', () => {
+    const panel = document.querySelector('.form-panel .panel-body');
+    const icon = document.querySelector('#toggleFormBtn i');
+    
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        icon.className = 'fas fa-chevron-down';
+    } else {
+        panel.style.display = 'none';
+        icon.className = 'fas fa-chevron-up';
+    }
+});
+
+// ===== EDIT STUDENT =====
 async function editStudent(id) {
     try {
         showLoading(true);
@@ -215,32 +218,34 @@ async function editStudent(id) {
         document.getElementById('course').value = student.course;
         document.getElementById('year_level').value = student.year_level;
         
-        // Set form to edit mode
-        const form = document.getElementById('studentForm');
-        form.dataset.mode = 'edit';
-        form.dataset.editId = id;
+        // Set edit mode
+        isEditMode = true;
+        currentEditId = id;
         
-        // Update form header
-        document.querySelector('.form-header h2').innerHTML = '<i class="fas fa-edit"></i> Edit Student';
+        // Update UI
+        const submitBtn = document.querySelector('#studentForm button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-pen"></i> Update Record';
         
-        // Scroll to form
-        document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+        // Expand form if collapsed
+        document.querySelector('.form-panel .panel-body').style.display = 'block';
+        document.querySelector('#toggleFormBtn i').className = 'fas fa-chevron-down';
+        
+        // Highlight form
+        document.querySelector('.form-panel').style.boxShadow = '0 0 0 2px var(--accent-gold)';
         
         showToast('Edit mode activated', 'info');
         
     } catch (error) {
-        console.error('❌ Error:', error);
         showToast('Failed to load student details', 'error');
     } finally {
         showLoading(false);
     }
 }
 
-// DELETE: Remove student with confirmation
+// ===== DELETE STUDENT =====
 async function deleteStudent(id) {
-    // Show custom confirmation dialog
-    const confirmed = await showConfirmationDialog(
-        'Delete Student',
+    const confirmed = await showConfirmationModal(
+        'Delete Student Record',
         'Are you sure you want to delete this student? This action cannot be undone.'
     );
     
@@ -258,84 +263,76 @@ async function deleteStudent(id) {
         }
         
         showToast('Student deleted successfully!', 'success');
-        
-        // Refresh student list
         await fetchAllStudents();
         
     } catch (error) {
-        console.error('❌ Error:', error);
         showToast('Failed to delete student', 'error');
     } finally {
         showLoading(false);
     }
 }
 
-// SEARCH & FILTER: Apply all filters
+// ===== SEARCH & FILTERS =====
+document.getElementById('searchInput').addEventListener('input', debounce(() => {
+    currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
+    applyFilters();
+}, 300));
+
+document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        
+        currentFilters.filterType = this.dataset.filter;
+        applyFilters();
+    });
+});
+
+document.getElementById('resetBtn').addEventListener('click', resetFilters);
+
 function applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const courseFilter = document.getElementById('filterCourse').value;
-    const yearFilter = document.getElementById('filterYear').value;
-    
-    let filteredStudents = [...allStudents];
+    let filtered = [...allStudents];
     
     // Apply search filter
-    if (searchTerm) {
-        filteredStudents = filteredStudents.filter(student => 
-            student.first_name.toLowerCase().includes(searchTerm) ||
-            student.last_name.toLowerCase().includes(searchTerm) ||
-            student.student_number.toLowerCase().includes(searchTerm) ||
-            student.course.toLowerCase().includes(searchTerm)
+    if (currentFilters.search) {
+        filtered = filtered.filter(student => 
+            student.first_name.toLowerCase().includes(currentFilters.search) ||
+            student.last_name.toLowerCase().includes(currentFilters.search) ||
+            student.student_number.toLowerCase().includes(currentFilters.search)
         );
     }
     
     // Apply course filter
-    if (courseFilter) {
-        filteredStudents = filteredStudents.filter(student => 
-            student.course === courseFilter
+    if (currentFilters.filterType !== 'all') {
+        const courseMap = {
+            'cs': 'Computer Science',
+            'it': 'Information Technology',
+            'ds': 'Data Science',
+            'se': 'Software Engineering'
+        };
+        filtered = filtered.filter(student => 
+            student.course === courseMap[currentFilters.filterType]
         );
     }
     
-    // Apply year filter
-    if (yearFilter) {
-        filteredStudents = filteredStudents.filter(student => 
-            student.year_level == yearFilter
-        );
-    }
-    
-    displayStudents(filteredStudents);
+    displayStudents(filtered);
 }
 
-// RESET FILTERS: Clear all filters
 function resetFilters() {
     document.getElementById('searchInput').value = '';
-    document.getElementById('filterCourse').value = '';
-    document.getElementById('filterYear').value = '';
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-filter="all"]').classList.add('active');
     
-    displayStudents(allStudents);
+    currentFilters = {
+        search: '',
+        filterType: 'all'
+    };
     
+    applyFilters();
     showToast('Filters cleared', 'info');
 }
 
-// POPULATE COURSE FILTER
-function populateCourseFilter() {
-    const courses = [
-        'Computer Science',
-        'Information Technology',
-        'Data Science',
-        'Software Engineering'
-    ];
-    
-    const select = document.getElementById('filterCourse');
-    
-    courses.forEach(course => {
-        const option = document.createElement('option');
-        option.value = course;
-        option.textContent = course;
-        select.appendChild(option);
-    });
-}
-
-// FORM VALIDATION
+// ===== UTILITY FUNCTIONS =====
 function validateForm(data) {
     if (!data.student_number || data.student_number.length < 5) {
         showToast('Please enter a valid student number', 'error');
@@ -357,59 +354,87 @@ function validateForm(data) {
         return false;
     }
     
-    if (!data.year_level || data.year_level < 1 || data.year_level > 4) {
-        showToast('Please select a valid year level', 'error');
+    if (!data.year_level) {
+        showToast('Please select a year level', 'error');
         return false;
     }
     
     return true;
 }
 
-// RESET FORM
 function resetForm() {
     document.getElementById('studentForm').reset();
-    const form = document.getElementById('studentForm');
-    form.dataset.mode = 'add';
-    form.dataset.editId = '';
-    document.querySelector('.form-header h2').innerHTML = '<i class="fas fa-plus-circle"></i> Add New Student';
+    isEditMode = false;
+    currentEditId = null;
+    
+    const submitBtn = document.querySelector('#studentForm button[type="submit"]');
+    submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Record';
+    
+    document.querySelector('.form-panel').style.boxShadow = 'none';
 }
 
-// UPDATE STUDENT COUNT
-function updateStudentCount() {
+function updateStats() {
     document.getElementById('totalStudents').textContent = allStudents.length;
+    
+    const courses = new Set(allStudents.map(s => s.course));
+    document.getElementById('activeCourses').textContent = courses.size;
 }
 
-// SHOW LOADING STATE
+function updateCurrentTime() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+    });
+    document.getElementById('currentTime').textContent = timeStr;
+}
+
+function getYearSuffix(year) {
+    const suffixes = ['st', 'nd', 'rd', 'th'];
+    return suffixes[year - 1] || 'th';
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// ===== UI HELPER FUNCTIONS =====
 function showLoading(show) {
     const spinner = document.getElementById('loadingSpinner');
     const table = document.getElementById('studentTable');
-    const emptyState = document.getElementById('emptyState');
     
     if (show) {
-        spinner.style.display = 'block';
+        spinner.style.display = 'flex';
         table.style.opacity = '0.5';
-        if (emptyState) emptyState.style.display = 'none';
     } else {
         spinner.style.display = 'none';
         table.style.opacity = '1';
     }
 }
 
-// SHOW EMPTY STATE
 function showEmptyState(show) {
     const emptyState = document.getElementById('emptyState');
-    const table = document.getElementById('studentTable');
-    
-    if (show) {
-        emptyState.style.display = 'block';
-        table.style.display = 'none';
-    } else {
-        emptyState.style.display = 'none';
-        table.style.display = 'table';
-    }
+    emptyState.style.display = show ? 'block' : 'none';
 }
 
-// TOAST NOTIFICATION
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     
@@ -427,95 +452,26 @@ function showToast(message, type = 'info') {
     
     container.appendChild(toast);
     
-    // Remove after 3 seconds
     setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            container.removeChild(toast);
-        }, 300);
+        setTimeout(() => container.removeChild(toast), 300);
     }, 3000);
 }
 
-// CUSTOM CONFIRMATION DIALOG
-function showConfirmationDialog(title, message) {
+function showConfirmationModal(title, message) {
     return new Promise((resolve) => {
-        // Create modal element
-        const modal = document.createElement('div');
-        modal.className = 'confirmation-modal';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            animation: fadeIn 0.3s ease;
-        `;
+        const modal = document.getElementById('confirmModal');
+        document.getElementById('modalMessage').textContent = message;
+        modal.style.display = 'flex';
         
-        modal.innerHTML = `
-            <div style="
-                background: white;
-                padding: 2rem;
-                border-radius: var(--radius-2xl);
-                max-width: 400px;
-                text-align: center;
-                box-shadow: var(--shadow-2xl);
-            ">
-                <i class="fas fa-exclamation-triangle" style="color: var(--warning); font-size: 3rem; margin-bottom: 1rem;"></i>
-                <h3 style="margin-bottom: 1rem;">${title}</h3>
-                <p style="margin-bottom: 2rem; color: var(--gray);">${message}</p>
-                <div style="display: flex; gap: 1rem; justify-content: center;">
-                    <button class="btn btn-secondary" onclick="this.closest('.confirmation-modal').remove(); resolve(false)">
-                        Cancel
-                    </button>
-                    <button class="btn btn-danger" onclick="this.closest('.confirmation-modal').remove(); resolve(true)">
-                        Delete
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // Handle button clicks
-        modal.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const isConfirm = btn.textContent.includes('Delete');
-                resolve(isConfirm);
-            });
-        });
-    });
-}
-
-// UTILITY: Escape HTML to prevent XSS
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-// UTILITY: Get year suffix
-function getYearSuffix(year) {
-    const suffixes = ['st', 'nd', 'rd', 'th'];
-    return suffixes[year - 1] || 'th';
-}
-
-// UTILITY: Debounce function for search
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
+        document.getElementById('modalConfirm').onclick = () => {
+            modal.style.display = 'none';
+            resolve(true);
         };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+        
+        document.getElementById('modalCancel').onclick = () => {
+            modal.style.display = 'none';
+            resolve(false);
+        };
+    });
 }
