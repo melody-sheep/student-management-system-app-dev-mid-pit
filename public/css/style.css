@@ -7,13 +7,13 @@
 
 /* ===== THEME VARIABLES ===== */
 :root {
-    /* Core Colors - Sharp Black */
-    --black-pure: #0a0a0a;
-    --black-deep: #121212;
-    --black-matte: #1e1e1e;
-    --gray-1000: #2a2a2a;
-    --gray-900: #333333;
-    --gray-800: #3d3d3d;
+    /* Core Colors - Full Pure Black */
+    --black-pure: #000000;
+    --black-deep: #000000;
+    --black-matte: #000000;
+    --gray-1000: #1a1a1a;
+    --gray-900: #2a2a2a;
+    --gray-800: #3a3a3a;
     --gray-700: #4a4a4a;
     
     /* Accent Colors - Sharp & Vibrant */
@@ -34,23 +34,23 @@
     
     /* Text Colors */
     --text-primary: #ffffff;
-    --text-secondary: #e0e0e0;
-    --text-tertiary: #a0a0a0;
-    --text-muted: #6b7280;
+    --text-secondary: #ffffff;
+    --text-tertiary: #cccccc;
+    --text-muted: #999999;
     
     /* Glass Effects */
-    --glass-bg: rgba(18, 18, 18, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.05);
+    --glass-bg: rgba(0, 0, 0, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
     
-    /* Borders - light in dark mode */
+    /* Borders - Solid White in dark mode */
     --border-width: 1px;
-    --border-color: rgba(255, 255, 255, 0.2);
+    --border-color: #ffffff;
     --border-focus: var(--accent-blue);
     
     /* Shadows */
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.5);
-    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.6);
-    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.7);
+    --shadow-sm: 0 2px 4px rgba(255, 255, 255, 0.1);
+    --shadow-md: 0 4px 8px rgba(255, 255, 255, 0.15);
+    --shadow-lg: 0 8px 16px rgba(255, 255, 255, 0.2);
     
     /* Spacing */
     --space-xs: 4px;
@@ -471,7 +471,7 @@ body {
     color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .panel-header h3 i {
