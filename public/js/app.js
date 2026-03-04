@@ -13,6 +13,10 @@ let currentFilters = {
 let isEditMode = false;
 let currentEditId = null;
 
+// Expose on window for page-specific overrides
+window.allStudents = allStudents;
+window.currentFilters = currentFilters;
+
 // Course class mapping
 const courseClassMap = {
     'Computer Science': 'cs',
@@ -70,6 +74,7 @@ async function fetchAllStudents() {
         }
         
         allStudents = await response.json();
+        window.allStudents = allStudents; // Sync with window object
         console.log(`📊 Loaded ${allStudents.length} student records`);
         
         updateStats();
@@ -566,6 +571,13 @@ function showConfirmationModal(title, message) {
     });
 }
 
-// Export functions for global access (for onclick handlers)
+// Export functions for global access (for onclick handlers and page-specific overrides)
 window.editStudent = editStudent;
 window.deleteStudent = deleteStudent;
+window.displayStudents = displayStudents;
+window.applyFilters = applyFilters;
+window.fetchAllStudents = fetchAllStudents;
+window.getCourseClass = getCourseClass;
+window.escapeHtml = escapeHtml;
+window.getYearSuffix = getYearSuffix;
+window.showToast = showToast;

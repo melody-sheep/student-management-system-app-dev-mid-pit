@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudentFlow - Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--black-pure);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            max-width: 900px;
+            padding: 2rem;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .brand-glow {
+            color: var(--accent-blue);
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .nav-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            padding: 0 1rem;
+        }
+
+        .nav-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-card-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .nav-card-icon.blue { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
+        .nav-card-icon.orange { background: rgba(249, 115, 22, 0.1); color: var(--accent-orange); }
+        .nav-card-icon.pink { background: rgba(236, 72, 153, 0.1); color: var(--accent-pink); }
+        .nav-card-icon.green { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+
+        .nav-card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-card-desc {
+            font-size: 0.95rem;
+            color: var(--text-tertiary);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .stats-preview {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-preview-item {
+            text-align: center;
+        }
+
+        .stat-preview-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            display: block;
+        }
+
+        .stat-preview-label {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+            padding: 0 1rem;
+        }
+
+        .feature-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--accent-orange);
+            margin-bottom: 1rem;
+        }
+
+        .feature-text {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .background-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            .nav-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-sun"></i>
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="background-pattern">
+            <svg width="100%" height="100%">
+                <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+        </div>
+
+        <div class="hero-content">
+            <div style="margin-bottom: 2rem;">
+                <i class="fas fa-atom" style="font-size: 5rem; color: var(--accent-blue);"></i>
+            </div>
+            <h1 class="hero-title">
+                Student<span class="brand-glow">Flow</span>
+            </h1>
+            <p class="hero-subtitle">
+                Modern Student Management System for Academic Excellence
+            </p>
+
+            <!-- Stats Preview -->
+            <div class="stats-preview">
+                <div class="stat-preview-item">
+                    <span class="stat-preview-value" id="homeStudentCount">0</span>
+                    <span class="stat-preview-label">Students</span>
+                </div>
+                <div class="stat-preview-item">
+                    <span class="stat-preview-value" id="homeCourseCount">4</span>
+                    <span class="stat-preview-label">Courses</span>
+                </div>
+                <div class="stat-preview-item">
+                    <span class="stat-preview-value">99%</span>
+                    <span class="stat-preview-label">Uptime</span>
+                </div>
+            </div>
+
+            <!-- Navigation Cards -->
+            <div class="nav-cards">
+                <a href="students.html" class="nav-card">
+                    <div class="nav-card-icon blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="nav-card-title">Student Management</h3>
+                    <p class="nav-card-desc">Add, edit, and manage student records with real-time database synchronization</p>
+                </a>
+
+                <a href="index.html" class="nav-card">
+                    <div class="nav-card-icon orange">
+                        <i class="fas fa-gauge-high"></i>
+                    </div>
+                    <h3 class="nav-card-title">Dashboard</h3>
+                    <p class="nav-card-desc">View comprehensive analytics and statistics at a glance</p>
+                </a>
+
+                <a href="#analytics" class="nav-card" onclick="showComingSoon(event)">
+                    <div class="nav-card-icon pink">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="nav-card-title">Analytics</h3>
+                    <p class="nav-card-desc">Track performance metrics and generate detailed reports</p>
+                </a>
+
+                <a href="#settings" class="nav-card" onclick="showComingSoon(event)">
+                    <div class="nav-card-icon green">
+                        <i class="fas fa-sliders"></i>
+                    </div>
+                    <h3 class="nav-card-title">Settings</h3>
+                    <p class="nav-card-desc">Customize system preferences and manage user accounts</p>
+                </a>
+            </div>
+
+            <!-- Features -->
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-database feature-icon"></i>
+                    <p class="feature-text">MySQL Database</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-shield-halved feature-icon"></i>
+                    <p class="feature-text">Secure & Reliable</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-bolt feature-icon"></i>
+                    <p class="feature-text">Real-time Updates</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-mobile-screen feature-icon"></i>
+                    <p class="feature-text">Responsive Design</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        // Theme Management
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTheme();
+            fetchStudentCount();
+        });
+
+        function initializeTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const savedTheme = localStorage.getItem('theme');
+            
+            if (savedTheme === 'light') {
+                document.body.classList.remove('dark-mode');
+                document.body.classList.add('light-mode');
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                if (document.body.classList.contains('dark-mode')) {
+                    document.body.classList.remove('dark-mode');
+                    document.body.classList.add('light-mode');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.body.classList.remove('light-mode');
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        }
+
+        // Fetch student count from database
+        async function fetchStudentCount() {
+            try {
+                const response = await fetch('/api/students');
+                if (response.ok) {
+                    const students = await response.json();
+                    document.getElementById('homeStudentCount').textContent = students.length;
+                }
+            } catch (error) {
+                console.error('Failed to fetch student count:', error);
+            }
+        }
+
+        function showComingSoon(event) {
+            event.preventDefault();
+            showToast('This feature is coming soon!', 'info');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-xmark',
+                info: 'fa-circle-info',
+                warning: 'fa-triangle-exclamation'
+            };
+            
+            toast.innerHTML = `
+                <i class="fas ${icons[type]}"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
