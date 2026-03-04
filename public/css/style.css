@@ -22,15 +22,15 @@
     --accent-pink: #ec4899;
     --accent-green: #10b981;
     --accent-purple: #8b5cf6;
-    --neon-green: #22c55e; /* brighter green for hover */
+    --neon-green: #22c55e;
     --delete-red: #ef4444;
     --delete-red-dark: #dc2626;
     
-    /* Course Colors - Updated Mapping */
-    --course-cs: var(--accent-orange);    /* Computer Science */
-    --course-it: var(--accent-pink);      /* Information Technology */
-    --course-ds: var(--accent-green);     /* Data Science */
-    --course-se: var(--accent-blue);       /* Software Engineering */
+    /* Course Colors */
+    --course-cs: var(--accent-orange);
+    --course-it: var(--accent-pink);
+    --course-ds: var(--accent-green);
+    --course-se: var(--accent-blue);
     
     /* Text Colors */
     --text-primary: #ffffff;
@@ -42,7 +42,7 @@
     --glass-bg: rgba(0, 0, 0, 0.8);
     --glass-border: rgba(255, 255, 255, 0.1);
     
-    /* Borders - Solid White in dark mode */
+    /* Borders */
     --border-width: 1px;
     --border-color: #ffffff;
     --border-focus: var(--accent-blue);
@@ -67,31 +67,105 @@
     --transition-slow: 0.35s ease;
 }
 
-/* ===== LIGHT MODE - Softer but with dark borders ===== */
+/* ===== LIGHT MODE - Vanilla/Cream with black borders ===== */
 .light-mode {
-    --black-pure: #f5f7fa;
-    --black-deep: #eef2f6;
-    --black-matte: #e2e8f0;
-    --gray-1000: #cbd5e1;
-    --gray-900: #94a3b8;
-    --gray-800: #64748b;
-    --gray-700: #475569;
+    --black-pure: #fdf5e6;
+    --black-deep: #fef9f0;
+    --black-matte: #faf3e8;
+    --gray-1000: #e8dcc8;
+    --gray-900: #d4c4a8;
+    --gray-800: #b8a888;
+    --gray-700: #9c8c68;
     
-    --text-primary: #1e293b;
-    --text-secondary: #334155;
-    --text-tertiary: #475569;
-    --text-muted: #64748b;
+    /* Hover colors - warm vanilla tint */
+    --hover-bg-light: rgba(139, 119, 101, 0.1);
+    --hover-bg-medium: rgba(139, 119, 101, 0.15);
+    --hover-bg-accent: rgba(59, 130, 246, 0.15);
     
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(0, 0, 0, 0.05);
-    /* Borders - dark in light mode */
-    --border-color: rgba(0, 0, 0, 0.2);
+    /* Dark text for readability */
+    --text-primary: #3d3426;
+    --text-secondary: #4a4132;
+    --text-tertiary: #5c5040;
+    --text-muted: #7a6b56;
     
-    /* Course colors remain sharp */
+    --glass-bg: rgba(253, 245, 230, 0.95);
+    --glass-border: rgba(139, 119, 101, 0.2);
+    --border-color: #000000;
+    
+    /* Course colors */
     --course-cs: #f97316;
     --course-it: #ec4899;
     --course-ds: #10b981;
     --course-se: #3b82f6;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(139, 119, 101, 0.15);
+    --shadow-md: 0 4px 12px rgba(139, 119, 101, 0.2);
+    --shadow-lg: 0 8px 24px rgba(139, 119, 101, 0.25);
+    
+    --nav-hover: var(--gray-900);
+    --btn-hover: var(--gray-900);
+    --table-hover: var(--gray-900);
+}
+
+/* ===== LIGHT MODE HOVER EFFECTS ===== */
+.light-mode .nav-item:hover {
+    background: #000000;
+    color: #ffd700;
+}
+
+.light-mode .nav-item.active {
+    background: #000000;
+    color: #ffd700;
+    border-left: 3px solid #ffd700;
+}
+
+.light-mode .menu-toggle:hover {
+    background: #000000;
+    color: #ffd700;
+    border-color: #ffd700;
+}
+
+.light-mode .action-btn:hover {
+    background: #000000;
+    color: #ffd700;
+    border-color: #ffd700;
+}
+
+.light-mode .panel-btn:hover {
+    background: #000000;
+    color: #ffd700;
+    border-color: #ffd700;
+}
+
+.light-mode .filter-chip:hover {
+    background: #000000;
+    color: #ffd700;
+    border-color: #ffd700;
+}
+
+.light-mode .action-btn-sm:hover {
+    background: #000000;
+    border-color: #ffd700;
+    color: #ffd700;
+}
+
+.light-mode .page-btn:hover:not(:disabled) {
+    background: #000000;
+    border-color: #ffd700;
+    color: #ffd700;
+}
+
+.light-mode #studentTable tbody tr:hover {
+    background: #e8dcc8;
+}
+
+.light-mode #studentTable th {
+    background: var(--black-matte);
+}
+
+.light-mode .stat-card:hover {
+    background: #e8dcc8;
 }
 
 /* ===== GLOBAL STYLES ===== */
@@ -187,9 +261,28 @@ body {
     letter-spacing: 0.5px;
 }
 
-.nav-brand i {
-    color: var(--accent-blue);
+/* Dark mode - Neon Blue Logo */
+.dark-mode .nav-brand i {
+    color: #00d4ff;
     font-size: 1.8rem;
+    text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #00d4ff;
+}
+
+.dark-mode .brand-glow {
+    color: #00d4ff;
+    text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
+}
+
+/* Light mode - Black Logo */
+.light-mode .nav-brand i {
+    color: #000000;
+    font-size: 1.8rem;
+    text-shadow: none;
+}
+
+.light-mode .brand-glow {
+    color: #000000;
+    text-shadow: none;
 }
 
 .nav-profile {
@@ -397,7 +490,6 @@ body {
     font-size: 1.5rem;
 }
 
-/* Different colors for each stat card */
 .stat-card:nth-child(1) .stat-icon { background: var(--accent-blue); }
 .stat-card:nth-child(2) .stat-icon { background: var(--accent-pink); }
 .stat-card:nth-child(3) .stat-icon { background: var(--accent-green); }
@@ -550,7 +642,6 @@ body {
     line-height: 1.2;
 }
 
-/* Custom dropdown arrow */
 .input-group select {
     padding-right: 2.5rem;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -561,11 +652,6 @@ body {
 
 .input-group select option {
     background: var(--black-pure);
-    color: var(--text-primary);
-}
-
-/* Remove colored options – now same as year dropdown */
-.input-group select option {
     color: var(--text-primary);
 }
 
@@ -600,13 +686,13 @@ body {
 }
 
 .btn-primary {
-    background: var(--accent-green);  /* Green by default */
+    background: var(--accent-green);
     color: white;
     border-color: var(--accent-green);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: var(--neon-green);     /* Brighter green on hover */
+    background: var(--neon-green);
     border-color: var(--neon-green);
 }
 
@@ -615,7 +701,6 @@ body {
     cursor: not-allowed;
 }
 
-/* Valid form button (already green, but we keep the class for consistency) */
 .btn-primary.btn-valid {
     background: var(--accent-green);
     border-color: var(--accent-green);
@@ -729,14 +814,12 @@ body {
     font-size: 0.8rem;
 }
 
-/* Filter chip hover states using course colors */
 .filter-chip[data-filter="all"]:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
 .filter-chip[data-filter="cs"]:hover { border-color: var(--course-cs); color: var(--course-cs); }
 .filter-chip[data-filter="it"]:hover { border-color: var(--course-it); color: var(--course-it); }
 .filter-chip[data-filter="ds"]:hover { border-color: var(--course-ds); color: var(--course-ds); }
 .filter-chip[data-filter="se"]:hover { border-color: var(--course-se); color: var(--course-se); }
 
-/* Filter chip active states */
 .filter-chip[data-filter="all"].active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
 .filter-chip[data-filter="cs"].active { background: var(--course-cs); color: white; border-color: var(--course-cs); }
 .filter-chip[data-filter="it"].active { background: var(--course-it); color: white; border-color: var(--course-it); }
@@ -782,7 +865,6 @@ body {
     border-left: 3px solid transparent;
 }
 
-/* Course-specific row borders */
 #studentTable tbody tr[data-course="Computer Science"] { border-left-color: var(--course-cs); }
 #studentTable tbody tr[data-course="Information Technology"] { border-left-color: var(--course-it); }
 #studentTable tbody tr[data-course="Data Science"] { border-left-color: var(--course-ds); }
@@ -792,7 +874,6 @@ body {
     background: var(--gray-900);
 }
 
-/* Course name styling */
 .course-name {
     font-weight: 600;
     padding: 2px 0;
@@ -804,7 +885,6 @@ body {
 .course-name.ds { color: var(--course-ds); border-bottom-color: var(--course-ds); }
 .course-name.se { color: var(--course-se); border-bottom-color: var(--course-se); }
 
-/* Status badge */
 .status-badge {
     padding: 4px 8px;
     font-size: 0.75rem;
@@ -819,7 +899,6 @@ body {
 .status-badge.ds { background: rgba(16, 185, 129, 0.1); color: var(--course-ds); border-color: var(--course-ds); }
 .status-badge.se { background: rgba(59, 130, 246, 0.1); color: var(--course-se); border-color: var(--course-se); }
 
-/* Action buttons */
 .action-buttons {
     display: flex;
     gap: var(--space-xs);
@@ -841,7 +920,6 @@ body {
     color: var(--accent-blue);
 }
 
-/* Delete button specific hover */
 .action-btn-sm:last-child:hover {
     border-color: var(--delete-red);
     color: var(--delete-red);
@@ -1016,7 +1094,7 @@ body {
 
 .modal-icon {
     font-size: 2.5rem;
-    color: var(--delete-red);  /* Red icon for delete */
+    color: var(--delete-red);
     margin-bottom: var(--space-lg);
     text-align: center;
 }
