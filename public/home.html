@@ -8,20 +8,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
+        body {
+            overflow-y: auto; /* Ensure body can scroll */
+            height: auto;
+            min-height: 100vh;
+        }
+
         .hero-section {
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* Changed from center to allow natural flow */
             justify-content: center;
-            background: var(--black-pure);
+            background: var(--bg-primary);
             position: relative;
-            overflow: hidden;
+            overflow-y: auto; /* Allow scrolling within hero if needed */
+            padding: 4rem 2rem;
         }
 
         .hero-content {
             text-align: center;
             z-index: 10;
-            max-width: 900px;
+            max-width: 1200px;
+            width: 100%;
             padding: 2rem;
         }
 
@@ -54,9 +62,10 @@
         }
 
         .nav-card {
-            background: var(--glass-bg);
+            background: var(--surface-glass);
+            backdrop-filter: var(--glass-blur);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
+            border-radius: 0; /* Sharp corners per earlier request */
             padding: 2.5rem;
             cursor: pointer;
             transition: all var(--transition-base);
@@ -76,7 +85,7 @@
         .nav-card-icon {
             width: 80px;
             height: 80px;
-            border-radius: 50%;
+            border-radius: 0; /* Sharp corners */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -138,9 +147,10 @@
         }
 
         .feature-item {
-            background: var(--glass-bg);
+            background: var(--surface-glass);
+            backdrop-filter: var(--glass-blur);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
+            border-radius: 0; /* Sharp corners */
             padding: 1.5rem;
             text-align: center;
         }
@@ -162,9 +172,14 @@
             height: 100%;
             opacity: 0.03;
             pointer-events: none;
+            top: 0;
+            left: 0;
         }
 
         @media (max-width: 768px) {
+            .hero-section {
+                padding: 2rem 1rem;
+            }
             .hero-title {
                 font-size: 2.5rem;
             }
@@ -224,8 +239,18 @@
                 </div>
             </div>
 
-            <!-- Navigation Cards -->
+            <!-- Navigation Cards - Dashboard First -->
             <div class="nav-cards">
+                <!-- Dashboard Card (now first) -->
+                <a href="dashboard.html" class="nav-card">
+                    <div class="nav-card-icon orange">
+                        <i class="fas fa-gauge-high"></i>
+                    </div>
+                    <h3 class="nav-card-title">Dashboard</h3>
+                    <p class="nav-card-desc">View comprehensive analytics and statistics at a glance</p>
+                </a>
+
+                <!-- Student Management Card (second) -->
                 <a href="students.html" class="nav-card">
                     <div class="nav-card-icon blue">
                         <i class="fas fa-users"></i>
@@ -234,14 +259,7 @@
                     <p class="nav-card-desc">Add, edit, and manage student records with real-time database synchronization</p>
                 </a>
 
-                <a href="index.html" class="nav-card">
-                    <div class="nav-card-icon orange">
-                        <i class="fas fa-gauge-high"></i>
-                    </div>
-                    <h3 class="nav-card-title">Dashboard</h3>
-                    <p class="nav-card-desc">View comprehensive analytics and statistics at a glance</p>
-                </a>
-
+                <!-- Analytics Card (third) -->
                 <a href="#analytics" class="nav-card" onclick="showComingSoon(event)">
                     <div class="nav-card-icon pink">
                         <i class="fas fa-chart-pie"></i>
@@ -250,6 +268,7 @@
                     <p class="nav-card-desc">Track performance metrics and generate detailed reports</p>
                 </a>
 
+                <!-- Settings Card (fourth) -->
                 <a href="#settings" class="nav-card" onclick="showComingSoon(event)">
                     <div class="nav-card-icon green">
                         <i class="fas fa-sliders"></i>
