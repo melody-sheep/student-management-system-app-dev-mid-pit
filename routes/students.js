@@ -8,7 +8,8 @@ router.get('/', async (req, res) => {
         const [rows] = await db.query('SELECT * FROM students ORDER BY last_name ASC');
         res.json(rows);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Failed to fetch students', details: error.message });
     }
 });
 
@@ -21,7 +22,8 @@ router.get('/:id', async (req, res) => {
         }
         res.json(rows[0]);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Failed to fetch student', details: error.message });
     }
 });
 
@@ -30,6 +32,11 @@ router.post('/', async (req, res) => {
     try {
         const { student_number, first_name, last_name, course, year_level } = req.body;
         
+        // Validate required fields
+        if (!student_number || !first_name || !last_name || !course || !year_level) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
         // Check if student number exists
         const [existing] = await db.query('SELECT id FROM students WHERE student_number = ?', [student_number]);
         if (existing.length > 0) {
@@ -44,7 +51,8 @@ router.post('/', async (req, res) => {
         const [newStudent] = await db.query('SELECT * FROM students WHERE id = ?', [result.insertId]);
         res.status(201).json(newStudent[0]);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Failed to create student', details: error.message });
     }
 });
 
@@ -53,6 +61,17 @@ router.put('/:id', async (req, res) => {
     try {
         const { student_number, first_name, last_name, course, year_level } = req.body;
         
+        // Validate required fields
+        if (!student_number || !first_name || !last_name || !course || !year_level) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        // Check if student exists
+        const [existing] = await db.query('SELECT id FROM students WHERE id = ?', [req.params.id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
         await db.query(
             'UPDATE students SET student_number = ?, first_name = ?, last_name = ?, course = ?, year_level = ? WHERE id = ?',
             [student_number, first_name, last_name, course, year_level, req.params.id]
@@ -61,17 +80,25 @@ router.put('/:id', async (req, res) => {
         const [updated] = await db.query('SELECT * FROM students WHERE id = ?', [req.params.id]);
         res.json(updated[0]);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Failed to update student', details: error.message });
     }
 });
 
 // DELETE student
 router.delete('/:id', async (req, res) => {
     try {
+        // Check if student exists
+        const [existing] = await db.query('SELECT id FROM students WHERE id = ?', [req.params.id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
         await db.query('DELETE FROM students WHERE id = ?', [req.params.id]);
         res.json({ message: 'Student deleted successfully' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Failed to delete student', details: error.message });
     }
 });
 
@@ -80,12 +107,13 @@ router.get('/search/:keyword', async (req, res) => {
     try {
         const keyword = `%${req.params.keyword}%`;
         const [rows] = await db.query(
-            'SELECT * FROM students WHERE first_name LIKE ? OR last_name LIKE ?',
-            [keyword, keyword]
+            'SELECT * FROM students WHERE first_name LIKE ? OR last_name LIKE ? OR student_number LIKE ? OR course LIKE ?',
+            [keyword, keyword, keyword, keyword]
         );
         res.json(rows);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Failed to search students', details: error.message });
     }
 });
 

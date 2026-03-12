@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/favicon.png" sizes="32x32" class="favicon-link">
+    <link rel="icon" href="assets/favicon.png" sizes="16x16" class="favicon-link">
+    <link rel="apple-touch-icon" href="assets/favicon.png">
     <title>Student Management - StudentFlow</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="favicon.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
@@ -87,7 +91,7 @@
                 </button>
                 
                 <div class="page-title">
-                    <h2><i class="fas fa-users" style="color: var(--accent-blue);"></i> Student Management</h2>
+                    <h2><i class="fas fa-users" style="color: var(--accent-neon-blue);"></i> Student Management</h2>
                     <p style="font-size: 0.9rem; color: var(--text-tertiary);">Manage and track student records</p>
                 </div>
                 
@@ -237,134 +241,10 @@
 
                 <!-- Full Width Table Section -->
                 <div class="full-width-section">
-                    <!-- Left Panel - Registration Form -->
-                    <div class="panel">
-                        <div class="panel-header">
-                            <h3><i class="fas fa-plus-circle" style="color: var(--accent-orange);"></i> <span id="formTitle">Student Registration</span></h3>
-                            <div class="panel-actions">
-                                <button class="panel-btn" id="clearFormBtn" title="Clear form">
-                                    <i class="fas fa-eraser"></i>
-                                </button>
-                                <button class="panel-btn" id="toggleFormBtn" title="Toggle panel">
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="panel-body" id="formPanel">
-                            <form id="studentForm" class="compact-form">
-                                <div class="form-row">
-                                    <div class="input-group">
-                                        <i class="fas fa-id-card"></i>
-                                        <input type="text" id="student_number" placeholder="Student ID (e.g., 2024-0001)" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row double">
-                                    <div class="input-group">
-                                        <i class="fas fa-user"></i>
-                                        <input type="text" id="first_name" placeholder="First Name" required>
-                                    </div>
-                                    <div class="input-group">
-                                        <i class="fas fa-user"></i>
-                                        <input type="text" id="last_name" placeholder="Last Name" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row double">
-                                    <div class="input-group">
-                                        <i class="fas fa-book-open"></i>
-                                        <select id="course" required>
-                                            <option value="" disabled selected>Course</option>
-                                            <option value="Computer Science">BSCS</option>
-                                            <option value="Information Technology">BSIT</option>
-                                            <option value="Data Science">BSDS</option>
-                                            <option value="Software Engineering">BSSE</option>
-                                        </select>
-                                    </div>
-                                    <div class="input-group">
-                                        <i class="fas fa-layer-group"></i>
-                                        <select id="year_level" required>
-                                            <option value="" disabled selected>Year Level</option>
-                                            <option value="1">First Year</option>
-                                            <option value="2">Second Year</option>
-                                            <option value="3">Third Year</option>
-                                            <option value="4">Fourth Year</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-actions">
-                                    <button type="button" class="btn btn-outline" id="cancelEditBtn" style="display: none;">
-                                        <i class="fas fa-times"></i>
-                                        Cancel
-                                    </button>
-                                    <button type="reset" class="btn btn-outline" id="resetBtn">
-                                        <i class="fas fa-undo-alt"></i>
-                                        Clear
-                                    </button>
-                                    <button type="submit" class="btn btn-primary" disabled>
-                                        <i class="fas fa-floppy-disk"></i>
-                                        <span id="submitBtnText">Save Record</span>
-                                    </button>
-                                </div>
-                            </form>
-
-                            <!-- Course Color Guide -->
-                            <div class="color-guide">
-                                <div class="guide-label">
-                                    <i class="fas fa-palette" style="color: var(--accent-orange);"></i>
-                                    <span>Course Colors</span>
-                                </div>
-                                <div class="guide-grid">
-                                    <div class="guide-item">
-                                        <div class="color-dot cs"></div>
-                                        <span>BSCS</span>
-                                    </div>
-                                    <div class="guide-item">
-                                        <div class="color-dot it"></div>
-                                        <span>BSIT</span>
-                                    </div>
-                                    <div class="guide-item">
-                                        <div class="color-dot ds"></div>
-                                        <span>BSDS</span>
-                                    </div>
-                                    <div class="guide-item">
-                                        <div class="color-dot se"></div>
-                                        <span>BSSE</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Panel - Student Records Table -->
+                    <!-- Table Container -->
                     <div class="panel">
                         <div class="panel-header">
                             <h3><i class="fas fa-table" style="color: var(--accent-orange);"></i> Student Records</h3>
-                            <div class="search-wrapper">
-                                <i class="fas fa-magnifying-glass"></i>
-                                <input type="text" id="searchInput" placeholder="Search by name or ID...">
-                            </div>
-                        </div>
-
-                        <!-- Quick Filter Chips -->
-                        <div class="quick-filters">
-                            <button class="filter-chip active" data-filter="all">
-                                <i class="fas fa-globe"></i> All
-                            </button>
-                            <button class="filter-chip" data-filter="cs">
-                                <i class="fas fa-code"></i> BSCS
-                            </button>
-                            <button class="filter-chip" data-filter="it">
-                                <i class="fas fa-laptop"></i> BSIT
-                            </button>
-                            <button class="filter-chip" data-filter="ds">
-                                <i class="fas fa-chart-simple"></i> BSDS
-                            </button>
-                            <button class="filter-chip" data-filter="se">
-                                <i class="fas fa-gear"></i> BSSE
-                            </button>
                         </div>
 
                         <!-- Table Container -->
@@ -444,6 +324,16 @@
         </main>
     </div>
 
+    <!-- Motto Phrase -->
+    <div class="motto-phrase">
+        faith <span>+</span> curiosity <span>+</span> persistence
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p class="footer-text">Created 2026, by Alther Liga, Gio Yecyec, James Olaivar, Application Development PIT</p>
+    </footer>
+
     <!-- Toast Notifications Container -->
     <div id="toastContainer" class="toast-container"></div>
 
@@ -456,7 +346,7 @@
                     <i class="fas fa-pencil"></i>
                     <span>Editing Student Record</span>
                 </div>
-                <div id="studentPreview" class="student-preview-mini">
+                <div class="student-preview-mini">
                     <div id="previewAvatar" class="preview-avatar"></div>
                     <div class="preview-info">
                         <span id="previewName" class="preview-name"></span>
@@ -536,7 +426,7 @@
                         </div>
                         <div class="input-group">
                             <label for="year_level">
-                                <i class="fas fa-calendar layer-icon"></i>
+                                <i class="fas fa-calendar label-icon"></i>
                                 Year Level *
                             </label>
                             <div class="input-with-icon">
@@ -703,7 +593,7 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
+    <!-- Confirmation Modal --> 
     <div id="confirmModal" class="modal" style="display: none;">
         <div class="modal-content">
             <i class="fas fa-triangle-exclamation modal-icon"></i>

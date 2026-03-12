@@ -2,10 +2,11 @@
 ├── 📄 server.js                                   # 🚀 Main entry point - starts the Express server, connects routes, serves static files
 ├── 📄 package.json                                 # 📦 Project metadata, dependencies list, and npm scripts
 ├── 📄 package-lock.json                            # 🔒 Locks exact dependency versions (auto-generated)
-├── 📄 .env                                         # 🔐 Environment variables (DB credentials, port) - NEVER share this!
 ├── 📄 .gitignore                                    # 🙈 Files/folders to ignore when pushing to GitHub (node_modules, .env)
 ├── 📄 README.md                                     # 📖 Project documentation, setup instructions, features
 ├── 📄 test-db.js                                    # 🧪 Database connection test script
+├── 📄 check-tables.js                               # 🧪 Database table verification script
+├── 📄 test-api.js                                   # 🧪 API testing script
 ├── 📄 dev_task_plan.txt                             # 📝 Development task plan and notes
 │
 ├── 📁 config/                                       # ⚙️ Configuration files folder
@@ -16,16 +17,51 @@
 │
 ├── 📁 public/                                        # 🌍 Frontend files (served statically)
 │   ├── 📄 index.html                                  # 🏠 Main HTML page - contains form, table, search bar, navbar, footer
+│   ├── 📄 home.html                                    # 🏠 Home page
+│   ├── 📄 students.html                                # 🏠 Students page
 │   ├── 📁 css/                                        # 🎨 Stylesheets folder
-│   │   └── 📄 style.css                                # 💅 All CSS styles - Grid, Flexbox, variables, hover effects, responsive design
+│   │   ├── 📄 style.css                                # 💅 Main CSS styles - Grid, Flexbox, variables, hover effects, responsive design
+│   │   └── 📄 students.css                             # 💅 Students page specific styles
 │   ├── 📁 js/                                         # 📜 JavaScript files folder
-│   │   └── 📄 app.js                                    # ⚡ Frontend logic - fetch API, form handling, dynamic table, CRUD operations
-│   └── 📁 assets/                                      # 🖼️ (Optional) Images, icons, fonts
+│   │   ├── 📄 app.js                                    # ⚡ Frontend logic - fetch API, form handling, dynamic table, CRUD operations
+│   │   └── 📄 students.js                              # ⚡ Students page JavaScript
+│   └── 📁 assets/                                      # 🖼️ Images, icons, fonts (empty - no files)
 │
 └── 📁 postman/                                       # 🧪 Postman API documentation and test collections
-    ├── 📁 collections/                                 # 📂 API request collections
-    ├── 📁 environments/                                # 🌐 Environment configurations
-    ├── 📁 flows/                                       # 🔄 API workflow definitions
+    ├── 📁 collections/                                 # 📂 API request collections (empty - no files)
+    ├── 📁 environments/                                # 🌐 Environment configurations (empty - no files)
+    ├── 📁 flows/                                       # 🔄 API workflow definitions (empty - no files)
     ├── 📁 globals/                                     # 🌎 Global variables
     │   └── 📄 workspace.globals.yaml                   # 🌍 Workspace global variables
-    └── 📁 specs/                                       # 📋 API specifications
+    └── 📁 specs/                                       # 📋 API specifications (empty - no files)
+
+# ================================================================================
+# MISSING FILES (Not included in project directory):
+# ================================================================================
+# • .env - Environment variables file (contains sensitive DB credentials - intentionally excluded)
+# ================================================================================
+# 
+# NOTE: The .env file is intentionally NOT included in this project structure as it
+# contains sensitive information (database credentials, API keys, etc.). Each developer
+# should create their own .env file based on the .env.example or setup instructions.
+# 
+# To create your .env file, copy the template below:
+# ---------------------------------------------------------------------------
+# PORT=3000
+# DB_HOST=localhost
+# DB_USER=root
+# DB_PASSWORD=
+# DB_NAME=student_management
+# ---------------------------------------------------------------------------
+# ================================================================================
+
+# ================================================================================
+# EMPTY FOLDERS (No files present):
+# ================================================================================
+# • public/assets/ - Intended for images, icons, fonts (currently empty)
+# • postman/collections/ - Intended for API request collections (currently empty)
+# • postman/environments/ - Intended for environment configurations (currently empty)
+# • postman/flows/ - Intended for API workflow definitions (currently empty)
+# • postman/specs/ - Intended for API specifications (currently empty)
+# ================================================================================
+

@@ -13,9 +13,16 @@ let currentFilters = {
 let isEditMode = false;
 let currentEditId = null;
 
-// Expose on window for page-specific overrides
-window.allStudents = allStudents;
-window.currentFilters = currentFilters;
+// Expose on window for page-specific overrides with proper getter/setter
+Object.defineProperty(window, 'allStudents', {
+    get: function() { return allStudents; },
+    set: function(value) { allStudents = value; }
+});
+
+Object.defineProperty(window, 'currentFilters', {
+    get: function() { return currentFilters; },
+    set: function(value) { currentFilters = value; }
+});
 
 // Course class mapping
 const courseClassMap = {
@@ -25,14 +32,30 @@ const courseClassMap = {
     'Software Engineering': 'se'
 };
 
+// Course display names
+const courseDisplayMap = {
+    'Computer Science': 'BSCS',
+    'Information Technology': 'BSIT',
+    'Data Science': 'BSDS',
+    'Software Engineering': 'BSSE'
+};
+
+// Page context detection
+const isStudentsPage = !!document.getElementById('studentTableBody') || document.title.includes('Student Management');
+const isDashboardPage = document.title.includes('Dashboard') || !!document.getElementById('totalStudents');
+
 // Initialize application
 function initializeApp() {
     initializeTheme();
     fetchAllStudents();
-    setupEventListeners();
-    updateCurrentTime();
-    setInterval(updateCurrentTime, 1000);
-    setupFormValidation(); // New: real-time validation
+    if (isStudentsPage) {
+        setupEventListeners();
+        setupFormValidation();
+    }
+    if (isDashboardPage || isStudentsPage) {
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+    }
 }
 
 // ===== THEME MANAGEMENT =====
@@ -46,7 +69,9 @@ function initializeTheme() {
         document.body.classList.add('light-mode');
     }
     
-    themeToggle.addEventListener('click', toggleTheme);
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
 }
 
 function toggleTheme() {
@@ -66,46 +91,65 @@ function toggleTheme() {
 // ===== FETCH ALL STUDENTS =====
 async function fetchAllStudents() {
     try {
-        showLoading(true);
+        if (isStudentsPage) showLoading(true);
         const response = await fetch('/api/students');
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        allStudents = await response.json();
-        window.allStudents = allStudents; // Sync with window object
-        console.log(`📊 Loaded ${allStudents.length} student records`);
+        const data = await response.json();
+        allStudents = Array.isArray(data) ? data : [];
+        console.log(`📊 Loaded ${allStudents.length} student records on ${isStudentsPage ? 'students' : 'dashboard'} page`);
         
-        updateStats();
-        applyFilters();
+        if (isStudentsPage || isDashboardPage) {
+            updateStats();
+            if (isStudentsPage) applyFilters();
+        }
+        
+        // Trigger a custom event that students page can listen to
+        window.dispatchEvent(new CustomEvent('studentsLoaded', { 
+            detail: { students: allStudents } 
+        }));
+        
+        return allStudents;
         
     } catch (error) {
-        console.error('❌ Error:', error);
-        showToast('Failed to load student records', 'error');
-        showEmptyState(true);
+        console.error('❌ Error fetching students:', error);
+        if (typeof showToast === 'function') {
+            showToast('Failed to load student records. Please refresh the page.', 'error');
+        }
+        if (isStudentsPage) showEmptyState(true);
+        return [];
     } finally {
-        showLoading(false);
+        if (isStudentsPage) showLoading(false);
     }
 }
 
 // ===== DISPLAY STUDENTS =====
 function displayStudents(students) {
+    // Only run table logic on students page
+    if (!isStudentsPage) return;
+    
     const tbody = document.getElementById('studentTableBody');
     const emptyState = document.getElementById('emptyState');
     
+    if (!tbody) return;
+    
     if (!students || students.length === 0) {
         tbody.innerHTML = '';
-        emptyState.style.display = 'block';
-        document.getElementById('recordCount').textContent = 'Showing 0 of 0 records';
+        if (emptyState) emptyState.style.display = 'block';
+        const recordCount = document.getElementById('recordCount');
+        if (recordCount) recordCount.textContent = 'Showing 0 of 0 records';
         return;
     }
     
-    emptyState.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'none';
     
     let html = '';
     students.forEach((student, index) => {
         const courseClass = getCourseClass(student.course);
+        const courseDisplay = courseDisplayMap[student.course] || student.course;
         
         html += `
             <tr data-course="${escapeHtml(student.course)}" style="animation: fadeIn 0.3s ease ${index * 0.05}s both;">
@@ -117,7 +161,7 @@ function displayStudents(students) {
                 <td><strong style="color: var(--text-primary);">${escapeHtml(student.student_number)}</strong></td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <div style="width: 32px; height: 32px; background: var(--course-${courseClass}); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                        <div style="width: 32px; height: 32px; background: var(--course-${courseClass}); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 50%;">
                             ${escapeHtml(student.first_name.charAt(0))}${escapeHtml(student.last_name.charAt(0))}
                         </div>
                         <span style="color: var(--text-primary);">${escapeHtml(student.first_name)} ${escapeHtml(student.last_name)}</span>
@@ -125,7 +169,7 @@ function displayStudents(students) {
                 </td>
                 <td>
                     <span class="course-name ${courseClass}">
-                        ${escapeHtml(student.course)}
+                        ${escapeHtml(courseDisplay)}
                     </span>
                 </td>
                 <td style="color: var(--text-secondary);">${student.year_level}${getYearSuffix(student.year_level)} Year</td>
@@ -149,42 +193,60 @@ function displayStudents(students) {
     });
     
     tbody.innerHTML = html;
-    document.getElementById('recordCount').textContent = 
-        `Showing ${students.length} of ${allStudents.length} records`;
+    const recordCount = document.getElementById('recordCount');
+    if (recordCount) {
+        recordCount.textContent = `Showing ${students.length} of ${allStudents.length} records`;
+    }
 }
 
 // Helper to get course class
 function getCourseClass(course) {
-    return courseClassMap[course] || '';
+    return courseClassMap[course] || 'cs';
 }
 
-// ===== EVENT LISTENERS =====
+// ===== EVENT LISTENERS ===== (Students page only)
 function setupEventListeners() {
+    if (!isStudentsPage) return;
+    
     // Form submission
-    document.getElementById('studentForm').addEventListener('submit', handleFormSubmit);
+    const studentForm = document.getElementById('studentForm');
+    if (studentForm) {
+        studentForm.addEventListener('submit', handleFormSubmit);
+    }
     
     // Clear form button
-    document.getElementById('clearFormBtn').addEventListener('click', resetForm);
+    const clearFormBtn = document.getElementById('clearFormBtn');
+    if (clearFormBtn) {
+        clearFormBtn.addEventListener('click', resetForm);
+    }
     
     // Toggle form panel
-    document.getElementById('toggleFormBtn').addEventListener('click', () => {
-        const panelBody = document.querySelector('.panel .panel-body');
-        const icon = document.querySelector('#toggleFormBtn i');
-        
-        if (panelBody.style.display === 'none') {
-            panelBody.style.display = 'block';
-            icon.className = 'fas fa-chevron-down';
-        } else {
-            panelBody.style.display = 'none';
-            icon.className = 'fas fa-chevron-up';
-        }
-    });
+    const toggleFormBtn = document.getElementById('toggleFormBtn');
+    if (toggleFormBtn) {
+        toggleFormBtn.addEventListener('click', () => {
+            const panelBody = document.querySelector('.panel .panel-body');
+            const icon = document.querySelector('#toggleFormBtn i');
+            
+            if (panelBody) {
+                if (panelBody.style.display === 'none') {
+                    panelBody.style.display = 'block';
+                    if (icon) icon.className = 'fas fa-chevron-down';
+                } else {
+                    panelBody.style.display = 'none';
+                    if (icon) icon.className = 'fas fa-chevron-up';
+                }
+            }
+        });
+    }
     
     // Search input with debounce
-    document.getElementById('searchInput').addEventListener('input', debounce(() => {
-        currentFilters.search = document.getElementById('searchInput').value.toLowerCase();
-        applyFilters();
-    }, 300));
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(() => {
+            currentFilters.search = searchInput.value.toLowerCase();
+            applyFilters();
+        }, 300));
+    }
     
     // Filter chips
     document.querySelectorAll('.filter-chip').forEach(chip => {
@@ -198,16 +260,24 @@ function setupEventListeners() {
     });
     
     // Refresh button
-    document.getElementById('refreshBtn').addEventListener('click', fetchAllStudents);
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', fetchAllStudents);
+    }
     
     // Menu toggle
-    document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sideNav').classList.toggle('collapsed');
-    });
+    const menuToggle = document.getElementById('menuToggle');
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            document.getElementById('sideNav')?.classList.toggle('collapsed');
+        });
+    }
 }
 
 // ===== FORM VALIDATION (real-time) =====
 function setupFormValidation() {
+    if (!isStudentsPage) return;
+    
     const inputs = ['student_number', 'first_name', 'last_name', 'course', 'year_level'];
     inputs.forEach(id => {
         const el = document.getElementById(id);
@@ -216,32 +286,32 @@ function setupFormValidation() {
             el.addEventListener('change', validateFormRealTime);
         }
     });
-    validateFormRealTime(); // initial check
+    validateFormRealTime();
 }
 
 function validateFormRealTime() {
-    const data = {
-        student_number: document.getElementById('student_number').value,
-        first_name: document.getElementById('first_name').value,
-        last_name: document.getElementById('last_name').value,
-        course: document.getElementById('course').value,
-        year_level: document.getElementById('year_level').value
-    };
+    const studentNumber = document.getElementById('student_number')?.value || '';
+    const firstName = document.getElementById('first_name')?.value || '';
+    const lastName = document.getElementById('last_name')?.value || '';
+    const course = document.getElementById('course')?.value || '';
+    const yearLevel = document.getElementById('year_level')?.value || '';
     
     const isValid = 
-        data.student_number && data.student_number.length >= 5 &&
-        data.first_name && data.first_name.length >= 2 &&
-        data.last_name && data.last_name.length >= 2 &&
-        data.course &&
-        data.year_level && data.year_level >= 1 && data.year_level <= 4;
+        studentNumber && studentNumber.length >= 5 &&
+        firstName && firstName.length >= 2 &&
+        lastName && lastName.length >= 2 &&
+        course &&
+        yearLevel && parseInt(yearLevel) >= 1 && parseInt(yearLevel) <= 4;
     
     const submitBtn = document.querySelector('#studentForm button[type="submit"]');
-    if (isValid) {
-        submitBtn.disabled = false;
-        submitBtn.classList.add('btn-valid');
-    } else {
-        submitBtn.disabled = true;
-        submitBtn.classList.remove('btn-valid');
+    if (submitBtn) {
+        if (isValid) {
+            submitBtn.disabled = false;
+            submitBtn.classList.add('btn-valid');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('btn-valid');
+        }
     }
 }
 
@@ -250,11 +320,11 @@ async function handleFormSubmit(e) {
     e.preventDefault();
     
     const formData = {
-        student_number: document.getElementById('student_number').value,
-        first_name: document.getElementById('first_name').value,
-        last_name: document.getElementById('last_name').value,
-        course: document.getElementById('course').value,
-        year_level: parseInt(document.getElementById('year_level').value)
+        student_number: document.getElementById('student_number')?.value || '',
+        first_name: document.getElementById('first_name')?.value || '',
+        last_name: document.getElementById('last_name')?.value || '',
+        course: document.getElementById('course')?.value || '',
+        year_level: parseInt(document.getElementById('year_level')?.value || '0')
     };
     
     if (!validateForm(formData)) return;
@@ -305,11 +375,17 @@ async function editStudent(id) {
         const student = await response.json();
         
         // Populate form
-        document.getElementById('student_number').value = student.student_number;
-        document.getElementById('first_name').value = student.first_name;
-        document.getElementById('last_name').value = student.last_name;
-        document.getElementById('course').value = student.course;
-        document.getElementById('year_level').value = student.year_level;
+        const studentNumberInput = document.getElementById('student_number');
+        const firstNameInput = document.getElementById('first_name');
+        const lastNameInput = document.getElementById('last_name');
+        const courseSelect = document.getElementById('course');
+        const yearSelect = document.getElementById('year_level');
+        
+        if (studentNumberInput) studentNumberInput.value = student.student_number;
+        if (firstNameInput) firstNameInput.value = student.first_name;
+        if (lastNameInput) lastNameInput.value = student.last_name;
+        if (courseSelect) courseSelect.value = student.course;
+        if (yearSelect) yearSelect.value = student.year_level;
         
         // Set edit mode
         isEditMode = true;
@@ -317,18 +393,28 @@ async function editStudent(id) {
         
         // Update UI
         const submitBtn = document.querySelector('#studentForm button[type="submit"]');
-        submitBtn.innerHTML = '<i class="fas fa-pen"></i> Update Record';
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-pen"></i> Update Record';
+        }
         
         // Expand form if collapsed
         const panelBody = document.querySelector('.panel .panel-body');
-        panelBody.style.display = 'block';
-        document.querySelector('#toggleFormBtn i').className = 'fas fa-chevron-down';
+        if (panelBody) {
+            panelBody.style.display = 'block';
+        }
+        const toggleIcon = document.querySelector('#toggleFormBtn i');
+        if (toggleIcon) {
+            toggleIcon.className = 'fas fa-chevron-down';
+        }
         
         // Highlight form
-        document.querySelector('.panel').style.borderColor = 'var(--accent-orange)';
+        const panel = document.querySelector('.panel');
+        if (panel) {
+            panel.style.borderColor = 'var(--accent-orange)';
+        }
         
         // Scroll to form
-        document.querySelector('.panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         
         showToast('Edit mode activated', 'info');
         
@@ -374,14 +460,18 @@ async function deleteStudent(id) {
 
 // ===== FILTERS =====
 function applyFilters() {
+    if (!isStudentsPage) return;
+    
     let filtered = [...allStudents];
     
     // Apply search filter
     if (currentFilters.search) {
+        const search = currentFilters.search.toLowerCase();
         filtered = filtered.filter(student => 
-            student.first_name.toLowerCase().includes(currentFilters.search) ||
-            student.last_name.toLowerCase().includes(currentFilters.search) ||
-            student.student_number.toLowerCase().includes(currentFilters.search)
+            student.first_name.toLowerCase().includes(search) ||
+            student.last_name.toLowerCase().includes(search) ||
+            student.student_number.toLowerCase().includes(search) ||
+            student.course.toLowerCase().includes(search)
         );
     }
     
@@ -431,23 +521,32 @@ function validateForm(data) {
 }
 
 function resetForm() {
-    document.getElementById('studentForm').reset();
+    const form = document.getElementById('studentForm');
+    if (form) form.reset();
+    
     isEditMode = false;
     currentEditId = null;
     
     const submitBtn = document.querySelector('#studentForm button[type="submit"]');
-    submitBtn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Record';
+    if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Record';
+    }
     
-    document.querySelector('.panel').style.borderColor = 'var(--border-color)';
+    const panel = document.querySelector('.panel');
+    if (panel) {
+        panel.style.borderColor = 'var(--border-color)';
+    }
     
-    validateFormRealTime(); // re-check validity
+    validateFormRealTime();
 }
 
 function updateStats() {
-    document.getElementById('totalStudents').textContent = allStudents.length;
+    const totalStudents = document.getElementById('totalStudents');
+    if (totalStudents) totalStudents.textContent = allStudents.length;
     
     const courses = new Set(allStudents.map(s => s.course));
-    document.getElementById('activeCourses').textContent = courses.size;
+    const activeCourses = document.getElementById('activeCourses');
+    if (activeCourses) activeCourses.textContent = courses.size;
 }
 
 function updateCurrentTime() {
@@ -457,7 +556,8 @@ function updateCurrentTime() {
         minute: '2-digit',
         hour12: true 
     });
-    document.getElementById('currentTime').textContent = timeStr;
+    const currentTime = document.getElementById('currentTime');
+    if (currentTime) currentTime.textContent = timeStr;
 }
 
 function getYearSuffix(year) {
@@ -493,22 +593,24 @@ function showLoading(show) {
     const spinner = document.getElementById('loadingSpinner');
     const table = document.getElementById('studentTable');
     
-    if (show) {
-        spinner.style.display = 'flex';
-        table.style.opacity = '0.5';
-    } else {
-        spinner.style.display = 'none';
-        table.style.opacity = '1';
+    if (spinner) {
+        spinner.style.display = show ? 'flex' : 'none';
+    }
+    if (table) {
+        table.style.opacity = show ? '0.5' : '1';
     }
 }
 
 function showEmptyState(show) {
     const emptyState = document.getElementById('emptyState');
-    emptyState.style.display = show ? 'block' : 'none';
+    if (emptyState) {
+        emptyState.style.display = show ? 'block' : 'none';
+    }
 }
 
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
+    if (!container) return;
     
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -538,29 +640,33 @@ function showToast(message, type = 'info') {
 function showConfirmationModal(title, message) {
     return new Promise((resolve) => {
         const modal = document.getElementById('confirmModal');
+        if (!modal) return resolve(false);
+        
         const modalMessage = document.getElementById('modalMessage');
         const modalTitle = modal.querySelector('h3');
+        const confirmBtn = document.getElementById('modalConfirm');
+        const cancelBtn = document.getElementById('modalCancel');
         
-        modalTitle.textContent = title;
-        modalMessage.textContent = message;
+        if (modalTitle) modalTitle.textContent = title;
+        if (modalMessage) modalMessage.textContent = message;
         modal.style.display = 'flex';
         
         const handleConfirm = () => {
             modal.style.display = 'none';
-            document.getElementById('modalConfirm').removeEventListener('click', handleConfirm);
-            document.getElementById('modalCancel').removeEventListener('click', handleCancel);
+            if (confirmBtn) confirmBtn.removeEventListener('click', handleConfirm);
+            if (cancelBtn) cancelBtn.removeEventListener('click', handleCancel);
             resolve(true);
         };
         
         const handleCancel = () => {
             modal.style.display = 'none';
-            document.getElementById('modalConfirm').removeEventListener('click', handleConfirm);
-            document.getElementById('modalCancel').removeEventListener('click', handleCancel);
+            if (confirmBtn) confirmBtn.removeEventListener('click', handleConfirm);
+            if (cancelBtn) cancelBtn.removeEventListener('click', handleCancel);
             resolve(false);
         };
         
-        document.getElementById('modalConfirm').addEventListener('click', handleConfirm);
-        document.getElementById('modalCancel').addEventListener('click', handleCancel);
+        if (confirmBtn) confirmBtn.addEventListener('click', handleConfirm);
+        if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
         
         // Close modal if clicked outside
         modal.addEventListener('click', function(e) {
@@ -571,7 +677,7 @@ function showConfirmationModal(title, message) {
     });
 }
 
-// Export functions for global access (for onclick handlers and page-specific overrides)
+// Export functions for global access
 window.editStudent = editStudent;
 window.deleteStudent = deleteStudent;
 window.displayStudents = displayStudents;
@@ -581,3 +687,7 @@ window.getCourseClass = getCourseClass;
 window.escapeHtml = escapeHtml;
 window.getYearSuffix = getYearSuffix;
 window.showToast = showToast;
+window.showComingSoon = function(event) {
+    event.preventDefault();
+    showToast('This feature is coming soon!', 'info');
+};

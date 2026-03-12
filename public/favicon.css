@@ -1,0 +1,11 @@
+/* Custom favicon styles for better browser display */
+.favicon-link {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+@media (prefers-color-scheme: dark) {
+  .favicon-link {
+    filter: brightness(1.1) contrast(1.2);
+  }
+}
