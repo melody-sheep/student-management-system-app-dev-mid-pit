@@ -40,22 +40,14 @@ const courseDisplayMap = {
     'Software Engineering': 'BSSE'
 };
 
-// Page context detection
-const isStudentsPage = !!document.getElementById('studentTableBody') || document.title.includes('Student Management');
-const isDashboardPage = document.title.includes('Dashboard') || !!document.getElementById('totalStudents');
-
 // Initialize application
 function initializeApp() {
     initializeTheme();
     fetchAllStudents();
-    if (isStudentsPage) {
-        setupEventListeners();
-        setupFormValidation();
-    }
-    if (isDashboardPage || isStudentsPage) {
-        updateCurrentTime();
-        setInterval(updateCurrentTime, 1000);
-    }
+    setupEventListeners();
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+    setupFormValidation();
 }
 
 // ===== THEME MANAGEMENT =====
@@ -91,7 +83,7 @@ function toggleTheme() {
 // ===== FETCH ALL STUDENTS =====
 async function fetchAllStudents() {
     try {
-        if (isStudentsPage) showLoading(true);
+        showLoading(true);
         const response = await fetch('/api/students');
         
         if (!response.ok) {
@@ -100,12 +92,10 @@ async function fetchAllStudents() {
         
         const data = await response.json();
         allStudents = Array.isArray(data) ? data : [];
-        console.log(`📊 Loaded ${allStudents.length} student records on ${isStudentsPage ? 'students' : 'dashboard'} page`);
+        console.log(`📊 Loaded ${allStudents.length} student records`);
         
-        if (isStudentsPage || isDashboardPage) {
-            updateStats();
-            if (isStudentsPage) applyFilters();
-        }
+        updateStats();
+        applyFilters();
         
         // Trigger a custom event that students page can listen to
         window.dispatchEvent(new CustomEvent('studentsLoaded', { 
@@ -116,21 +106,16 @@ async function fetchAllStudents() {
         
     } catch (error) {
         console.error('❌ Error fetching students:', error);
-        if (typeof showToast === 'function') {
-            showToast('Failed to load student records. Please refresh the page.', 'error');
-        }
-        if (isStudentsPage) showEmptyState(true);
+        showToast('Failed to load student records. Please refresh the page.', 'error');
+        showEmptyState(true);
         return [];
     } finally {
-        if (isStudentsPage) showLoading(false);
+        showLoading(false);
     }
 }
 
 // ===== DISPLAY STUDENTS =====
 function displayStudents(students) {
-    // Only run table logic on students page
-    if (!isStudentsPage) return;
-    
     const tbody = document.getElementById('studentTableBody');
     const emptyState = document.getElementById('emptyState');
     
@@ -204,10 +189,8 @@ function getCourseClass(course) {
     return courseClassMap[course] || 'cs';
 }
 
-// ===== EVENT LISTENERS ===== (Students page only)
+// ===== EVENT LISTENERS =====
 function setupEventListeners() {
-    if (!isStudentsPage) return;
-    
     // Form submission
     const studentForm = document.getElementById('studentForm');
     if (studentForm) {
@@ -276,8 +259,6 @@ function setupEventListeners() {
 
 // ===== FORM VALIDATION (real-time) =====
 function setupFormValidation() {
-    if (!isStudentsPage) return;
-    
     const inputs = ['student_number', 'first_name', 'last_name', 'course', 'year_level'];
     inputs.forEach(id => {
         const el = document.getElementById(id);
@@ -460,8 +441,6 @@ async function deleteStudent(id) {
 
 // ===== FILTERS =====
 function applyFilters() {
-    if (!isStudentsPage) return;
-    
     let filtered = [...allStudents];
     
     // Apply search filter
